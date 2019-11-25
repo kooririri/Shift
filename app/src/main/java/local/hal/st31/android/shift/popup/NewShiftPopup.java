@@ -2,21 +2,46 @@ package local.hal.st31.android.shift.popup;
 
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
+import android.app.TimePickerDialog;
 import android.content.Context;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.animation.OvershootInterpolator;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.TimePicker;
+import android.widget.Toast;
 
+import local.hal.st31.android.shift.MainActivity;
 import local.hal.st31.android.shift.R;
 import razerdp.basepopup.BasePopupWindow;
+import studio.carbonylgroup.textfieldboxes.SimpleTextChangedWatcher;
+import studio.carbonylgroup.textfieldboxes.TextFieldBoxes;
 
 public class NewShiftPopup extends BasePopupWindow {
+    private View popupView;
+    private LinearLayout LLStart;
+    private LinearLayout LLEnd;
+    private TextView startTime;
+    private TextView endTime;
+    private String startHour;
+    private String endHour;
+    private String startMinute;
+    private String endMinute;
+    private TextFieldBoxes tfbOccupation;
+    private TextFieldBoxes tfbMemo;
+    private String occupation;
+    private String memo;
+
     public NewShiftPopup(Context context) {
         super(context);
     }
 
     @Override
     public View onCreateContentView() {
-        return createPopupById(R.layout.popup_shift_add);
+        popupView = createPopupById(R.layout.popup_shift_add);
+        initView();
+        return popupView;
     }
 
     @Override
@@ -33,5 +58,84 @@ public class NewShiftPopup extends BasePopupWindow {
         showAnimator.setDuration(1000);
         showAnimator.setInterpolator(new OvershootInterpolator(-6));
         return showAnimator;
+    }
+
+    private void initView(){
+        LLStart = popupView.findViewById(R.id.self_shift_start_time);
+        LLStart.setOnClickListener(new onTimeBlockClickListener());
+        LLEnd = popupView.findViewById(R.id.self_shift_end_time);
+        LLEnd.setOnClickListener(new onTimeBlockClickListener());
+        startTime = popupView.findViewById(R.id.label_start_time);
+        endTime = popupView.findViewById(R.id.label_end_time);
+        tfbOccupation = popupView.findViewById(R.id.text_field_boxes_occupation);
+        tfbMemo = popupView.findViewById(R.id.text_field_boxes_memo);
+        tfbOccupation.setHasClearButton(true);
+        tfbMemo.setHasClearButton(true);
+        tfbOccupation.setSimpleTextChangeWatcher(new SimpleTextChangedWatcher() {
+            @Override
+            public void onTextChanged(String theNewText, boolean isError) {
+                occupation = theNewText;
+                Toast.makeText(getContext(),occupation,Toast.LENGTH_SHORT).show();
+            }
+        });
+        tfbMemo.setSimpleTextChangeWatcher(new SimpleTextChangedWatcher() {
+            @Override
+            public void onTextChanged(String theNewText, boolean isError) {
+                memo = theNewText;
+                Toast.makeText(getContext(),memo,Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private class onTimeBlockClickListener implements View.OnClickListener{
+        @Override
+        public void onClick(View view){
+            if(view.getId() == R.id.self_shift_start_time) {
+                TimePickerDialog dialog = new TimePickerDialog(getContext(), new StartTimePickerDialogSetListener(), 0, 0, true);
+                dialog.show();
+            }else if (view.getId() == R.id.self_shift_end_time){
+                TimePickerDialog dialog = new TimePickerDialog(getContext(), new EndTimePickerDialogSetListener(), 0, 0, true);
+                dialog.show();
+            }
+        }
+    }
+
+    private class StartTimePickerDialogSetListener implements TimePickerDialog.OnTimeSetListener{
+        @Override
+        public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+//            String msg = "開始時間選択ダイアログ：" + hourOfDay + "時" + minute + "分";
+//            Toast.makeText(getContext(),msg,Toast.LENGTH_SHORT).show();
+            if(hourOfDay < 10){
+                startHour = "0"+String.valueOf(hourOfDay);
+            }else{
+                startHour = String.valueOf(hourOfDay);
+            }
+            if(minute < 10){
+                startMinute = "0"+String.valueOf(minute);
+            }else{
+                startMinute = String.valueOf(minute);
+            }
+
+            startTime.setText(startHour+"："+startMinute);
+        }
+    }
+
+    private class EndTimePickerDialogSetListener implements TimePickerDialog.OnTimeSetListener{
+        @Override
+        public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+//            String msg = "終了時間選択ダイアログ：" + hourOfDay + "時" + minute + "分";
+//            Toast.makeText(getContext(),msg,Toast.LENGTH_SHORT).show();
+            if(hourOfDay < 10){
+                endHour = "0"+String.valueOf(hourOfDay);
+            }else{
+                endHour = String.valueOf(hourOfDay);
+            }
+            if(minute < 10){
+                endMinute = "0"+String.valueOf(minute);
+            }else{
+                endMinute = String.valueOf(minute);
+            }
+            endTime.setText(endHour+"："+endMinute);
+        }
     }
 }
