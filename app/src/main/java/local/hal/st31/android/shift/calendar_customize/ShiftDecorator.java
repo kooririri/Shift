@@ -1,9 +1,5 @@
 package local.hal.st31.android.shift.calendar_customize;
 
-import android.graphics.Color;
-import android.text.style.ForegroundColorSpan;
-import android.util.TimeUtils;
-
 import com.prolificinteractive.materialcalendarview.CalendarDay;
 import com.prolificinteractive.materialcalendarview.DayViewDecorator;
 import com.prolificinteractive.materialcalendarview.DayViewFacade;
@@ -11,7 +7,7 @@ import com.prolificinteractive.materialcalendarview.DayViewFacade;
 import java.util.Calendar;
 import java.util.Date;
 
-import local.hal.st31.android.shift.DateUtils;
+import local.hal.st31.android.shift.utils.DateUtils;
 
 public class ShiftDecorator implements DayViewDecorator {
 

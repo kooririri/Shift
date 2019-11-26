@@ -1,7 +1,8 @@
-package local.hal.st31.android.shift;
+package local.hal.st31.android.shift.utils;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 public class DateUtils {
@@ -18,5 +19,19 @@ public class DateUtils {
             e.printStackTrace();
         }
         return new Date();
+    }
+
+    /**
+     * 年月による日数を算出
+     */
+    public static int getDaysByYearMonth(int year, int month) {
+
+        Calendar a = Calendar.getInstance();
+        a.set(Calendar.YEAR, year);
+        a.set(Calendar.MONTH, month - 1);
+        a.set(Calendar.DATE, 1);
+        a.roll(Calendar.DATE, -1);
+        int maxDate = a.get(Calendar.DATE);
+        return maxDate;
     }
 }
