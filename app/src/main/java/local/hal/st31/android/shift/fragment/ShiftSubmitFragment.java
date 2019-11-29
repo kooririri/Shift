@@ -6,9 +6,11 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -48,16 +50,11 @@ public class ShiftSubmitFragment extends Fragment {
         fragmentView = inflater.inflate(R.layout.fragment_shift_submit,container,false);
         shiftList = fragmentView.findViewById(R.id.shiftListView);
         recyclerView = fragmentView.findViewById(R.id.recyclerView);
-//        recyclerView = new RecyclerView(getContext());
-        initRecyclerView();
         initView();
-
         return fragmentView;
     }
 
     private void initView(){
-//        initRecyclerView();
-//        shiftList = fragmentView.findViewById(R.id.shiftListView);
         //次の月（シフト）の日数を取得
         Calendar calendar = Calendar.getInstance();
         int year = calendar.get(Calendar.YEAR);
@@ -76,8 +73,22 @@ public class ShiftSubmitFragment extends Fragment {
         shiftMonthListAdapter.setList(mShiftData);
         shiftList.setAdapter(shiftMonthListAdapter);
 
+//        shiftList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//            @Override
+//            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+//                Log.e("pxl","日にちは"+position);
+//            }
+//        });
+
         dateLabel = fragmentView.findViewById(R.id.day_text);
         dateLabel.setText(year+"年"+month+"月");
+        dateLabel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                Log.e("aaa",shiftMonthListAdapter.getShiftHopeList().size()+"");
+            }
+        });
     }
 
     private void initRecyclerView(){
