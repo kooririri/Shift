@@ -2,10 +2,10 @@ package local.hal.st31.android.shift.beans;
 
 public class ShiftAttrBean {
     private int shiftId;
-    private String shiftName;
-    private String submitDate;//2019-11-25
-    private String modifyDate;
-    private String finalDate;
+    private String shiftName;//シフト名
+    private String submitDate;//2019-11-25　提出期限
+    private String modifyDate;//修正期限
+    private String finalDate;//最終発表時間
 
     public ShiftAttrBean(){
 

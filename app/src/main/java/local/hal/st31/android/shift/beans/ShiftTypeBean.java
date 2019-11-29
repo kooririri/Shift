@@ -1,23 +1,18 @@
 package local.hal.st31.android.shift.beans;
 
 public class ShiftTypeBean {
-    private int shiftId;
-    private String beginTime;//09:30
-    private String endTime;
-    private String typeName;
-    private String comment;
+    private int shiftId;//シフト自体ID
+    private int shiftTypeId;//シフトの番タイプID　
+    private String beginTime;//09:30　開始時間
+    private String endTime;//終了時間
+    private String typeName;//シフト番名 例:A勤
+    private String comment;//説明とかメモ
+    private int selectedFlag = 0;//選択されたら1、外したら0、デフォルトは0
 
     public ShiftTypeBean(){
 
     }
 
-    public ShiftTypeBean(int shiftId,String beginTime,String endTime,String typeName,String comment){
-        this.shiftId = shiftId;
-        this.beginTime = beginTime;
-        this.endTime = endTime;
-        this.typeName = typeName;
-        this.comment = comment;
-    }
 
     public int getShiftId() {
         return shiftId;
@@ -25,6 +20,14 @@ public class ShiftTypeBean {
 
     public void setShiftId(int shiftId) {
         this.shiftId = shiftId;
+    }
+
+    public int getShiftTypeId() {
+        return shiftTypeId;
+    }
+
+    public void setShiftTypeId(int shiftTypeId) {
+        this.shiftTypeId = shiftTypeId;
     }
 
     public String getBeginTime() {
@@ -57,5 +60,13 @@ public class ShiftTypeBean {
 
     public void setComment(String comment) {
         this.comment = comment;
+    }
+
+    public int getSelectedFlag() {
+        return selectedFlag;
+    }
+
+    public void setSelectedFlag(int selectedFlag) {
+        this.selectedFlag = selectedFlag;
     }
 }
