@@ -10,12 +10,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,15 +22,13 @@ import java.util.Map;
 import local.hal.st31.android.shift.R;
 import local.hal.st31.android.shift.adapters.ShiftMonthListAdapter;
 import local.hal.st31.android.shift.adapters.ShiftOptionAdapter;
-import local.hal.st31.android.shift.beans.ShiftAttrBean;
-import local.hal.st31.android.shift.beans.ShiftTypeBean;
 import local.hal.st31.android.shift.beans.TempBean;
 import local.hal.st31.android.shift.utils.DateUtils;
 
 public class ShiftSubmitFragment extends Fragment {
     private View fragmentView;
 
-    private ListView shiftList;
+    private RecyclerView shiftListView;
     private List<TempBean> mShiftData;
     private ShiftMonthListAdapter shiftMonthListAdapter;
     private TextView dateLabel;
@@ -48,7 +45,7 @@ public class ShiftSubmitFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         fragmentView = inflater.inflate(R.layout.fragment_shift_submit,container,false);
-        shiftList = fragmentView.findViewById(R.id.shiftListView);
+        shiftListView = fragmentView.findViewById(R.id.shiftListView);
         recyclerView = fragmentView.findViewById(R.id.recyclerView);
         initView();
         return fragmentView;
@@ -62,6 +59,7 @@ public class ShiftSubmitFragment extends Fragment {
         int days = DateUtils.getDaysByYearMonth(year,month);
 
         mShiftData = new ArrayList<>();
+
         TempBean tempBean = new TempBean();
         for(int i = 1 ; i <= days; i++){
            tempBean.setDay(i);
@@ -71,17 +69,16 @@ public class ShiftSubmitFragment extends Fragment {
         }
         shiftMonthListAdapter = new ShiftMonthListAdapter(getContext());
         shiftMonthListAdapter.setList(mShiftData);
-        shiftList.setAdapter(shiftMonthListAdapter);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
+        layoutManager.setOrientation(LinearLayoutManager.VERTICAL);//縦並び
+        shiftListView.setLayoutManager(layoutManager);
+        shiftListView.setAdapter(shiftMonthListAdapter);
 
-//        shiftList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-//            @Override
-//            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-//                Log.e("pxl","日にちは"+position);
-//            }
-//        });
-
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(new Date());
+        cal.add(Calendar.MONTH, 1);
         dateLabel = fragmentView.findViewById(R.id.day_text);
-        dateLabel.setText(year+"年"+month+"月");
+        dateLabel.setText(cal.get(Calendar.YEAR)+"年"+cal.get(Calendar.MONTH)+"月");
         dateLabel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -91,17 +88,5 @@ public class ShiftSubmitFragment extends Fragment {
         });
     }
 
-    private void initRecyclerView(){
-//        recyclerView = fragmentView.findViewById(R.id.recyclerView);
-//        shiftOptionAdapter = new ShiftOptionAdapter(getContext());
-//        shiftOptionAdapter.setShiftList(getTestData());
-
-//        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
-//        layoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);//横並び
-//        recyclerView.setLayoutManager(layoutManager);
-//        recyclerView.setAdapter(shiftOptionAdapter);
-//        shiftOptionAdapter.notifyDataSetChanged();
-
-    }
 
 }
