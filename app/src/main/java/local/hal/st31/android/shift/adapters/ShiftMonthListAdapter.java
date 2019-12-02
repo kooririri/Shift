@@ -29,7 +29,8 @@ import local.hal.st31.android.shift.utils.DateUtils;
 
 public class ShiftMonthListAdapter extends RecyclerView.Adapter<ShiftMonthListAdapter.ShiftMonthListViewHolder> {
 
-    private List<TempBean> list;
+//    private List<TempBean> list;
+    private  List<List<ShiftTypeBean>> list;
     private LayoutInflater mInflater;
     private List<ShiftHopeBean> shiftHopeList = new ArrayList<>();
     private ShiftHopeBean shiftHopeBean;
@@ -62,10 +63,11 @@ public class ShiftMonthListAdapter extends RecyclerView.Adapter<ShiftMonthListAd
 
     @Override
     public void onBindViewHolder(@NonNull ShiftMonthListViewHolder shiftMonthListViewHolder, int position) {
-        TempBean tempBean = list.get(position);
-        shiftMonthListViewHolder.textView.setText(tempBean.getDay() + "日");
+//        TempBean tempBean = list.get(position);
+        List<ShiftTypeBean> data = list.get(position);
+        shiftMonthListViewHolder.textView.setText((position+1) + "日");
         ShiftOptionAdapter shiftOptionAdapter = new ShiftOptionAdapter(viewGroup.getContext());
-        shiftOptionAdapter.setShiftList(getTestData());
+        shiftOptionAdapter.setShiftList(data);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(viewGroup.getContext());
         layoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);//横並び
@@ -83,16 +85,17 @@ public class ShiftMonthListAdapter extends RecyclerView.Adapter<ShiftMonthListAd
                 Date date = calendar.getTime();
                 String shiftHopeDate = DateUtils.date2String(date, "yyyy-MM-dd");
 
-                shiftHopeBean = new ShiftHopeBean(res.getShiftId() + shiftHopeDate + res.getShiftTypeId());
+
+//                shiftHopeBean = new ShiftHopeBean(res.getShiftId() + shiftHopeDate + res.getShiftTypeId());
 //                Log.e("pxl","shiftHopeId = " + shiftHopeBean.getShiftHopeId());
                 if (res.getSelectedFlag() == 0) {
                     res.setSelectedFlag(1);
 
-                    shiftHopeBean.setDate(shiftHopeDate);
-                    shiftHopeBean.setShiftTypeId(res.getShiftTypeId());
-                    shiftHopeBean.setShiftId(res.getShiftId());
-
-                    shiftHopeList.add(shiftHopeBean);
+//                    shiftHopeBean.setDate(shiftHopeDate);
+//                    shiftHopeBean.setShiftTypeId(res.getShiftTypeId());
+//                    shiftHopeBean.setShiftId(res.getShiftId());
+//
+//                    shiftHopeList.add(shiftHopeBean);
                 } else {
                     res.setSelectedFlag(0);
 //                    for(ShiftHopeBean bean : shiftHopeList){
@@ -101,13 +104,13 @@ public class ShiftMonthListAdapter extends RecyclerView.Adapter<ShiftMonthListAd
 //                        }
 //                    }
                     //for循环会报错
-                    Iterator<ShiftHopeBean> iterator = shiftHopeList.iterator();
-                    while (iterator.hasNext()) {
-                        ShiftHopeBean temp = iterator.next();
-                        if (temp.getShiftHopeId().equals(shiftHopeBean.getShiftHopeId())) {
-                            iterator.remove();
-                        }
-                    }
+//                    Iterator<ShiftHopeBean> iterator = shiftHopeList.iterator();
+//                    while (iterator.hasNext()) {
+//                        ShiftHopeBean temp = iterator.next();
+//                        if (temp.getShiftHopeId().equals(shiftHopeBean.getShiftHopeId())) {
+//                            iterator.remove();
+//                        }
+//                    }
                 }
 //                Log.e("pxl",position + "            "+ res.getSelectedFlag() + "       "+res.getTypeName());
                 Log.e("pxl", shiftHopeList.size() + "");
@@ -120,7 +123,7 @@ public class ShiftMonthListAdapter extends RecyclerView.Adapter<ShiftMonthListAd
         return list == null ? 0 : list.size();
     }
 
-    public void setList(List<TempBean> list) {
+    public void setList(List<List<ShiftTypeBean>> list) {
         this.list = list;
 //        notifyDataSetChanged();
     }
@@ -130,49 +133,6 @@ public class ShiftMonthListAdapter extends RecyclerView.Adapter<ShiftMonthListAd
     }
 
 
-    private List<ShiftTypeBean> getTestData() {
-        List<ShiftTypeBean> list = new ArrayList<>();
-        ShiftTypeBean bean = new ShiftTypeBean();
-        bean.setShiftId(1);
-        bean.setShiftTypeId(1);
-        bean.setBeginTime("10:00");
-        bean.setEndTime("19:00");
-        bean.setTypeName("A勤");
-        bean.setComment("休憩1時間");
-        list.add(bean);
-        bean = new ShiftTypeBean();
-        bean.setShiftId(2);
-        bean.setShiftTypeId(2);
-        bean.setBeginTime("12:00");
-        bean.setEndTime("21:00");
-        bean.setTypeName("B勤");
-        bean.setComment("休憩1時間");
-        list.add(bean);
-        bean = new ShiftTypeBean();
-        bean.setShiftId(3);
-        bean.setShiftTypeId(3);
-        bean.setBeginTime("12:00");
-        bean.setEndTime("21:00");
-        bean.setTypeName("C勤");
-        bean.setComment("休憩1時間");
-        list.add(bean);
-        bean = new ShiftTypeBean();
-        bean.setShiftId(4);
-        bean.setShiftTypeId(4);
-        bean.setBeginTime("12:00");
-        bean.setEndTime("21:00");
-        bean.setTypeName("D勤");
-        bean.setComment("休憩1時間");
-        list.add(bean);
-        bean = new ShiftTypeBean();
-        bean.setShiftId(5);
-        bean.setShiftTypeId(5);
-        bean.setBeginTime("12:00");
-        bean.setEndTime("21:00");
-        bean.setTypeName("E勤");
-        bean.setComment("休憩1時間");
-        list.add(bean);
-        return list;
-    }
+
 }
 

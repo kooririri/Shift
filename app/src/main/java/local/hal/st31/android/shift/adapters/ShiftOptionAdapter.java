@@ -102,11 +102,3 @@ public class ShiftOptionAdapter extends RecyclerView.Adapter<ShiftOptionAdapter.
 
 }
 
-//class ShiftOptionViewHolder extends RecyclerView.ViewHolder{
-//    TextView optionBlock;
-//
-//    public ShiftOptionViewHolder(@NonNull View itemView) {
-//        super(itemView);
-//        optionBlock = itemView.findViewById(R.id.shift_option);
-//    }
-//}

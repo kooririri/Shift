@@ -5,21 +5,35 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/day_text"
-        android:paddingLeft="15dp"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="35dp"
-        android:background="#5e5e5e"
-        android:text="JUNE 22"
-        android:textStyle="bold"
-        android:textColor="@android:color/white"
-        android:gravity="center_vertical"
-        />
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        android:layout_weight="1">
+        <TextView
+            android:id="@+id/day_text"
+            android:paddingLeft="15dp"
+            android:layout_width="match_parent"
+            android:layout_height="35dp"
+            android:background="#5e5e5e"
+            android:text="JUNE 22"
+            android:textStyle="bold"
+            android:textColor="@android:color/white"
+            android:gravity="center_vertical"
+            />
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/shiftListView"
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/shiftListView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+    </LinearLayout>
+
+
+    <Button
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="0dp"
+        android:layout_weight="0.1"
+        android:layout_marginBottom="50dp"
+        android:text="提出"/>
 
 </LinearLayout>

@@ -22,6 +22,7 @@ import java.util.Map;
 import local.hal.st31.android.shift.R;
 import local.hal.st31.android.shift.adapters.ShiftMonthListAdapter;
 import local.hal.st31.android.shift.adapters.ShiftOptionAdapter;
+import local.hal.st31.android.shift.beans.ShiftTypeBean;
 import local.hal.st31.android.shift.beans.TempBean;
 import local.hal.st31.android.shift.utils.DateUtils;
 
@@ -29,7 +30,6 @@ public class ShiftSubmitFragment extends Fragment {
     private View fragmentView;
 
     private RecyclerView shiftListView;
-    private List<TempBean> mShiftData;
     private ShiftMonthListAdapter shiftMonthListAdapter;
     private TextView dateLabel;
 
@@ -58,17 +58,9 @@ public class ShiftSubmitFragment extends Fragment {
         int month = calendar.get(Calendar.MONTH)+2;
         int days = DateUtils.getDaysByYearMonth(year,month);
 
-        mShiftData = new ArrayList<>();
 
-        TempBean tempBean = new TempBean();
-        for(int i = 1 ; i <= days; i++){
-           tempBean.setDay(i);
-           tempBean.setRecyclerView(recyclerView);
-           mShiftData.add(tempBean);
-           tempBean = new TempBean();
-        }
         shiftMonthListAdapter = new ShiftMonthListAdapter(getContext());
-        shiftMonthListAdapter.setList(mShiftData);
+        shiftMonthListAdapter.setList(getTestData());
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);//縦並び
         shiftListView.setLayoutManager(layoutManager);
@@ -78,7 +70,7 @@ public class ShiftSubmitFragment extends Fragment {
         cal.setTime(new Date());
         cal.add(Calendar.MONTH, 1);
         dateLabel = fragmentView.findViewById(R.id.day_text);
-        dateLabel.setText(cal.get(Calendar.YEAR)+"年"+cal.get(Calendar.MONTH)+"月");
+        dateLabel.setText(cal.get(Calendar.YEAR)+"年"+(cal.get(Calendar.MONTH)+1)+"月");
         dateLabel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -88,5 +80,61 @@ public class ShiftSubmitFragment extends Fragment {
         });
     }
 
+    private  List<List<ShiftTypeBean>> getTestData() {
+        Calendar calendar = Calendar.getInstance();
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH)+2;
+        int days = DateUtils.getDaysByYearMonth(year,month);
+
+        List<List<ShiftTypeBean>> data = new ArrayList<>();
+
+        for(int i = 1;i<=days;i++){
+            List<ShiftTypeBean> list = new ArrayList<>();
+            ShiftTypeBean bean = new ShiftTypeBean();
+            bean.setShiftId(1);
+            bean.setShiftTypeId(1);
+            bean.setBeginTime("10:00");
+            bean.setEndTime("19:00");
+            bean.setTypeName("A勤");
+            bean.setComment("休憩1時間");
+            list.add(bean);
+            bean = new ShiftTypeBean();
+            bean.setShiftId(2);
+            bean.setShiftTypeId(2);
+            bean.setBeginTime("12:00");
+            bean.setEndTime("21:00");
+            bean.setTypeName("B勤");
+            bean.setComment("休憩1時間");
+            list.add(bean);
+            bean = new ShiftTypeBean();
+            bean.setShiftId(3);
+            bean.setShiftTypeId(3);
+            bean.setBeginTime("12:00");
+            bean.setEndTime("21:00");
+            bean.setTypeName("C勤");
+            bean.setComment("休憩1時間");
+            list.add(bean);
+            bean = new ShiftTypeBean();
+            bean.setShiftId(4);
+            bean.setShiftTypeId(4);
+            bean.setBeginTime("12:00");
+            bean.setEndTime("21:00");
+            bean.setTypeName("D勤");
+            bean.setComment("休憩1時間");
+            list.add(bean);
+            bean = new ShiftTypeBean();
+            bean.setShiftId(5);
+            bean.setShiftTypeId(5);
+            bean.setBeginTime("12:00");
+            bean.setEndTime("21:00");
+            bean.setTypeName("E勤");
+            bean.setComment("休憩1時間");
+            list.add(bean);
+
+            data.add(list);
+        }
+
+        return data;
+    }
 
 }
