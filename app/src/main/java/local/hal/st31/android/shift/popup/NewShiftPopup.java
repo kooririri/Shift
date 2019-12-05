@@ -4,16 +4,30 @@ import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.app.TimePickerDialog;
 import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
+import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.animation.OvershootInterpolator;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.prolificinteractive.materialcalendarview.CalendarDay;
+import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
+import com.prolificinteractive.materialcalendarview.OnDateSelectedListener;
+
+import java.util.Date;
+
 import local.hal.st31.android.shift.MainActivity;
 import local.hal.st31.android.shift.R;
+import local.hal.st31.android.shift.beans.SelfScheduleBean;
+import local.hal.st31.android.shift.db.DataAccess;
+import local.hal.st31.android.shift.db.DatabaseHelper;
+import local.hal.st31.android.shift.fragment.HomeFragment;
+import local.hal.st31.android.shift.utils.DateUtils;
 import razerdp.basepopup.BasePopupWindow;
 import studio.carbonylgroup.textfieldboxes.SimpleTextChangedWatcher;
 import studio.carbonylgroup.textfieldboxes.TextFieldBoxes;
@@ -32,6 +46,8 @@ public class NewShiftPopup extends BasePopupWindow {
     private TextFieldBoxes tfbMemo;
     private String occupation;
     private String memo;
+    private DatabaseHelper _helper;
+    private Button sendButton;
 
     public NewShiftPopup(Context context) {
         super(context);
@@ -61,6 +77,8 @@ public class NewShiftPopup extends BasePopupWindow {
     }
 
     private void initView(){
+        _helper = new DatabaseHelper(getContext());
+        sendButton = popupView.findViewById(R.id.btn_send);
         LLStart = popupView.findViewById(R.id.self_shift_start_time);
         LLStart.setOnClickListener(new onTimeBlockClickListener());
         LLEnd = popupView.findViewById(R.id.self_shift_end_time);
@@ -85,7 +103,26 @@ public class NewShiftPopup extends BasePopupWindow {
                 Toast.makeText(getContext(),memo,Toast.LENGTH_SHORT).show();
             }
         });
+
+
+
+        sendButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SQLiteDatabase db = _helper.getWritableDatabase();
+                SelfScheduleBean selfScheduleBean = new SelfScheduleBean();
+                selfScheduleBean.setWork(occupation);
+                selfScheduleBean.setMemo(memo);
+                selfScheduleBean.setStartTime(startHour+":"+startMinute);
+                selfScheduleBean.setEndTime(endHour+":"+endMinute);
+                selfScheduleBean.setDate(new HomeFragment().selectedDate);
+                DataAccess.selfScheduleInsert(db,selfScheduleBean);
+
+                Toast.makeText(getContext(),"登録しました",Toast.LENGTH_LONG).show();
+            }
+        });
     }
+
 
     private class onTimeBlockClickListener implements View.OnClickListener{
         @Override

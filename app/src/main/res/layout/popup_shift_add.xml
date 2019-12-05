@@ -114,10 +114,10 @@
     </studio.carbonylgroup.textfieldboxes.TextFieldBoxes>
 
     <Button
-        android:id="@+id/btn_ok"
+        android:id="@+id/btn_send"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/button_ok"/>
+        android:text="@string/button_ok" />
 
 
 </LinearLayout>

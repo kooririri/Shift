@@ -15,11 +15,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         StringBuilder sb = new StringBuilder();
-        sb.append("CREATE TABLE memos (");
-        sb.append("_id INTEGER,");
-        sb.append("name TEXT,");
-        sb.append("content TEXT,");
-        sb.append("PRIMARY KEY (_id)");
+        sb.append("CREATE TABLE selfSchedule (");
+        sb.append("_id INTEGER PRIMARY KEY AUTOINCREMENT,");
+        sb.append("work TEXT,");
+        sb.append("memo TEXT,");
+        sb.append("start_time TEXT,");
+        sb.append("end_time TEXT,");
+        sb.append("date DATE");
         sb.append(")");
         String sql = sb.toString();
 

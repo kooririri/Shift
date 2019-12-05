@@ -21,9 +21,7 @@ import java.util.Map;
 
 import local.hal.st31.android.shift.R;
 import local.hal.st31.android.shift.adapters.ShiftMonthListAdapter;
-import local.hal.st31.android.shift.adapters.ShiftOptionAdapter;
 import local.hal.st31.android.shift.beans.ShiftTypeBean;
-import local.hal.st31.android.shift.beans.TempBean;
 import local.hal.st31.android.shift.utils.DateUtils;
 
 public class ShiftSubmitFragment extends Fragment {
@@ -33,8 +31,6 @@ public class ShiftSubmitFragment extends Fragment {
     private ShiftMonthListAdapter shiftMonthListAdapter;
     private TextView dateLabel;
 
-    private RecyclerView recyclerView;
-    private ShiftOptionAdapter shiftOptionAdapter;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -46,7 +42,6 @@ public class ShiftSubmitFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         fragmentView = inflater.inflate(R.layout.fragment_shift_submit,container,false);
         shiftListView = fragmentView.findViewById(R.id.shiftListView);
-        recyclerView = fragmentView.findViewById(R.id.recyclerView);
         initView();
         return fragmentView;
     }
