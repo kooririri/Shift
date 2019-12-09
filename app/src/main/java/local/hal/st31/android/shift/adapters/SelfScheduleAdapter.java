@@ -6,7 +6,10 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import com.yanzhenjie.recyclerview.SwipeRecyclerView;
 
 import java.util.List;
 
@@ -17,6 +20,7 @@ public class SelfScheduleAdapter extends RecyclerView.Adapter<SelfScheduleAdapte
 
     private LayoutInflater mInflater;
     private List<SelfScheduleBean> data;
+    private OnItemClickListener   mOnItemClickListener;
 
     public SelfScheduleAdapter(Context context){
         mInflater = LayoutInflater.from(context);
@@ -26,12 +30,16 @@ public class SelfScheduleAdapter extends RecyclerView.Adapter<SelfScheduleAdapte
         TextView timeTextView;
         TextView workTextVIew;
         TextView memoTextView;
+        LinearLayout itemLayout;
+        SwipeRecyclerView swipeRecyclerView;
 
         public SelfScheduleViewHolder(@NonNull View itemView) {
             super(itemView);
             timeTextView = itemView.findViewById(R.id.tx_time);
             workTextVIew = itemView.findViewById(R.id.tx_work);
             memoTextView = itemView.findViewById(R.id.tx_memo);
+            itemLayout = itemView.findViewById(R.id.itemLayout);
+            swipeRecyclerView = itemView.findViewById(R.id.swipe_menu);
         }
     }
 
@@ -43,12 +51,20 @@ public class SelfScheduleAdapter extends RecyclerView.Adapter<SelfScheduleAdapte
     }
 
     @Override
-    public void onBindViewHolder(@NonNull SelfScheduleViewHolder selfScheduleViewHolder, int i) {
-        SelfScheduleBean bean = data.get(i);
+    public void onBindViewHolder(@NonNull SelfScheduleViewHolder selfScheduleViewHolder, final int position) {
+        SelfScheduleBean bean = data.get(position);
         selfScheduleViewHolder.timeTextView.setText(bean.getStartTime()+"-"+bean.getEndTime()
         );
         selfScheduleViewHolder.workTextVIew.setText(bean.getWork());
         selfScheduleViewHolder.memoTextView.setText(bean.getMemo());
+        if (mOnItemClickListener != null) {
+            selfScheduleViewHolder.itemLayout.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    mOnItemClickListener.onItemClick(view, position);
+                }
+            });
+        }
     }
 
     @Override
@@ -59,4 +75,12 @@ public class SelfScheduleAdapter extends RecyclerView.Adapter<SelfScheduleAdapte
     public void setData(List<SelfScheduleBean> data){
         this.data = data;
     }
+
+        public interface OnItemClickListener{
+            void onItemClick(View view, int position);
+        }
+
+        public void setOnItemClickListener(OnItemClickListener mOnItemClickListener){
+            this.mOnItemClickListener = mOnItemClickListener;
+        }
 }

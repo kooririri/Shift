@@ -58,11 +58,11 @@
                 />
 
             <ImageView
+                android:id="@+id/btn_add"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginRight="20dp"
-                android:src="@drawable/baseline_add_24"
-                android:onClick="addButtonClick"/>
+                android:src="@drawable/baseline_add_24" />
         </LinearLayout>
 
         <android.support.v7.widget.RecyclerView

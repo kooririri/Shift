@@ -26,6 +26,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+//        getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+//        getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
+
 //        BottomNavigationView navView = findViewById(R.id.nav_view);
 //        mTextMessage = findViewById(R.id.message);
 //        navView.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
