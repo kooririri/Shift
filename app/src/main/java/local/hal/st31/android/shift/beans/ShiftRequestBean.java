@@ -1,21 +1,23 @@
 package local.hal.st31.android.shift.beans;
 
-public class ShiftHopeBean {
-    private String shiftHopeId;//シフト希望ID
-    private int shiftId;//シフト自体のID
+public class ShiftRequestBean {
+
+    private int id;//シフト希望ID
+    private int shiftId;
     private int shiftTypeId;//シフトの番タイプID
     private String date;
+    private int selectedFlag;
 
-    public ShiftHopeBean(String shiftHopeId){
-        this.shiftHopeId = shiftHopeId;
+    public ShiftRequestBean(){
+
     }
 
-    public String getShiftHopeId() {
-        return shiftHopeId;
+    public int getId() {
+        return id;
     }
 
-    public void setShiftHopeId(String shiftHopeId) {
-        this.shiftHopeId = shiftHopeId;
+    public void setId(int id) {
+        this.id = id;
     }
 
     public int getShiftId() {
@@ -40,5 +42,13 @@ public class ShiftHopeBean {
 
     public void setDate(String date) {
         this.date = date;
+    }
+
+    public int getSelectedFlag() {
+        return selectedFlag;
+    }
+
+    public void setSelectedFlag(int selectedFlag) {
+        this.selectedFlag = selectedFlag;
     }
 }

@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 
 import local.hal.st31.android.shift.R;
-import local.hal.st31.android.shift.beans.ShiftHopeBean;
 import local.hal.st31.android.shift.beans.ShiftTypeBean;
 import local.hal.st31.android.shift.beans.TempBean;
 import local.hal.st31.android.shift.utils.DateUtils;
@@ -32,8 +31,6 @@ public class ShiftMonthListAdapter extends RecyclerView.Adapter<ShiftMonthListAd
 //    private List<TempBean> list;
     private  List<List<ShiftTypeBean>> list;
     private LayoutInflater mInflater;
-    private List<ShiftHopeBean> shiftHopeList = new ArrayList<>();
-    private ShiftHopeBean shiftHopeBean;
     private ViewGroup viewGroup;
 
     static class ShiftMonthListViewHolder extends RecyclerView.ViewHolder {
@@ -86,34 +83,15 @@ public class ShiftMonthListAdapter extends RecyclerView.Adapter<ShiftMonthListAd
                 String shiftHopeDate = DateUtils.date2String(date, "yyyy-MM-dd");
 
 
-//                shiftHopeBean = new ShiftHopeBean(res.getShiftId() + shiftHopeDate + res.getShiftTypeId());
-//                Log.e("pxl","shiftHopeId = " + shiftHopeBean.getShiftHopeId());
+
                 if (res.getSelectedFlag() == 0) {
                     res.setSelectedFlag(1);
 
-//                    shiftHopeBean.setDate(shiftHopeDate);
-//                    shiftHopeBean.setShiftTypeId(res.getShiftTypeId());
-//                    shiftHopeBean.setShiftId(res.getShiftId());
-//
-//                    shiftHopeList.add(shiftHopeBean);
                 } else {
                     res.setSelectedFlag(0);
-//                    for(ShiftHopeBean bean : shiftHopeList){
-//                        if(bean.getShiftHopeId().equals(shiftHopeBean.getShiftHopeId())){
-//                            shiftHopeList.remove(bean);
-//                        }
-//                    }
-                    //for循环会报错
-//                    Iterator<ShiftHopeBean> iterator = shiftHopeList.iterator();
-//                    while (iterator.hasNext()) {
-//                        ShiftHopeBean temp = iterator.next();
-//                        if (temp.getShiftHopeId().equals(shiftHopeBean.getShiftHopeId())) {
-//                            iterator.remove();
-//                        }
-//                    }
+
                 }
-//                Log.e("pxl",position + "            "+ res.getSelectedFlag() + "       "+res.getTypeName());
-                Log.e("pxl", shiftHopeList.size() + "");
+
             }
         });
     }
@@ -128,9 +106,6 @@ public class ShiftMonthListAdapter extends RecyclerView.Adapter<ShiftMonthListAd
 //        notifyDataSetChanged();
     }
 
-    public List<ShiftHopeBean> getShiftHopeList(){
-        return shiftHopeList;
-    }
 
 
 

@@ -62,11 +62,6 @@
             />
     </LinearLayout>
 
-    <com.yanzhenjie.recyclerview.SwipeRecyclerView
-        android:id="@+id/swipe_menu"
-        android:layout_above="@+id/rl_add_remind"
-        android:layout_width="120dp"
-        android:layout_height="match_parent"/>
 
 
 </LinearLayout>

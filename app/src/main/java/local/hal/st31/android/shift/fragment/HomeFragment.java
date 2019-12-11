@@ -19,12 +19,7 @@ import android.widget.TextView;
 import com.prolificinteractive.materialcalendarview.CalendarDay;
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
 import com.prolificinteractive.materialcalendarview.OnDateSelectedListener;
-import com.yanzhenjie.recyclerview.OnItemMenuClickListener;
-import com.yanzhenjie.recyclerview.SwipeMenu;
-import com.yanzhenjie.recyclerview.SwipeMenuBridge;
-import com.yanzhenjie.recyclerview.SwipeMenuCreator;
-import com.yanzhenjie.recyclerview.SwipeMenuItem;
-import com.yanzhenjie.recyclerview.SwipeRecyclerView;
+
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -39,6 +34,7 @@ import local.hal.st31.android.shift.db.DataAccess;
 import local.hal.st31.android.shift.db.DatabaseHelper;
 import local.hal.st31.android.shift.popup.NewShiftPopup;
 import local.hal.st31.android.shift.utils.DateUtils;
+import local.hal.st31.android.shift.utils.GlobalUtils;
 
 public class HomeFragment extends Fragment {
     private View fragmentView;
@@ -49,11 +45,12 @@ public class HomeFragment extends Fragment {
     private RecyclerView selfScheduleRecyclerView;
     private SelfScheduleAdapter selfScheduleAdapter;
     private SQLiteDatabase db;
-    private SwipeRecyclerView swipeRecyclerView;
+
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
     }
 
 
@@ -101,7 +98,7 @@ public class HomeFragment extends Fragment {
     //Viewを初期化
     private void initFragmentView() {
         selfScheduleRecyclerView = fragmentView.findViewById(R.id.self_schedule_recyclerView);
-        swipeRecyclerView = fragmentView.findViewById(R.id.swipe_menu);
+
         calendarView = fragmentView.findViewById(R.id.calendarView);
         calendarView.setSelectedDate(CalendarDay.today());
         calendarView.addDecorators(new ShiftDecorator());
@@ -117,7 +114,7 @@ public class HomeFragment extends Fragment {
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);//横並び
         selfScheduleRecyclerView.setLayoutManager(layoutManager);
-        swipeRecyclerView.setSwipeMenuCreator(swipeMenuCreator);
+
         selfScheduleRecyclerView.setAdapter(selfScheduleAdapter);
 
 
@@ -147,36 +144,5 @@ public class HomeFragment extends Fragment {
         super.onPause();
     }
 
-    private SwipeMenuCreator swipeMenuCreator = new SwipeMenuCreator() {
-        @Override
-        public void onCreateMenu(SwipeMenu swipeLeftMenu, SwipeMenu swipeRightMenu, int position) {
-            int width = getResources().getDimensionPixelSize(R.dimen.bottom_line_height);
-
-            // 1. MATCH_PARENT 自适应高度，保持和Item一样高;
-            // 2. 指定具体的高，比如80;
-            // 3. WRAP_CONTENT，自身高度，不推荐;
-            int height = ViewGroup.LayoutParams.MATCH_PARENT;
-
-
-            // 添加右侧的，如果不添加，则右侧不会出现菜单。
-            {
-                SwipeMenuItem deleteItem = new SwipeMenuItem(getContext()).setBackground(R.color.colorPrimary)
-                        .setImage(R.drawable.baseline_cached_24)
-                        .setText("修正")
-                        .setTextColor(Color.WHITE)
-                        .setWidth(width)
-                        .setHeight(height);
-                swipeRightMenu.addMenuItem(deleteItem);// 添加菜单到右侧。
-
-                SwipeMenuItem addItem = new SwipeMenuItem(getContext()).setBackground(R.color.A400red)
-                        .setImage(R.drawable.baseline_delete_24)
-                        .setText("削除")
-                        .setTextColor(Color.WHITE)
-                        .setWidth(width)
-                        .setHeight(height);
-                swipeRightMenu.addMenuItem(addItem); // 添加菜单到右侧。
-            }
-        }
-    };
 
 }

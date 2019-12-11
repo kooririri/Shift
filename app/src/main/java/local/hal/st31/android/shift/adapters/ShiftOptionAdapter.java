@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 
 import local.hal.st31.android.shift.R;
-import local.hal.st31.android.shift.beans.ShiftHopeBean;
 import local.hal.st31.android.shift.beans.ShiftTypeBean;
 
 public class ShiftOptionAdapter extends RecyclerView.Adapter<ShiftOptionAdapter.ShiftOptionViewHolder> {

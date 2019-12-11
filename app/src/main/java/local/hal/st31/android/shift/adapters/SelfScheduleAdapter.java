@@ -31,7 +31,6 @@ public class SelfScheduleAdapter extends RecyclerView.Adapter<SelfScheduleAdapte
         TextView workTextVIew;
         TextView memoTextView;
         LinearLayout itemLayout;
-        SwipeRecyclerView swipeRecyclerView;
 
         public SelfScheduleViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -39,7 +38,7 @@ public class SelfScheduleAdapter extends RecyclerView.Adapter<SelfScheduleAdapte
             workTextVIew = itemView.findViewById(R.id.tx_work);
             memoTextView = itemView.findViewById(R.id.tx_memo);
             itemLayout = itemView.findViewById(R.id.itemLayout);
-            swipeRecyclerView = itemView.findViewById(R.id.swipe_menu);
+
         }
     }
 

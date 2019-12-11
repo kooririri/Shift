@@ -1,6 +1,11 @@
 package local.hal.st31.android.shift.fragment;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.database.sqlite.SQLiteDatabase;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -12,6 +17,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -19,10 +33,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import local.hal.st31.android.shift.MainActivity;
 import local.hal.st31.android.shift.R;
 import local.hal.st31.android.shift.adapters.ShiftMonthListAdapter;
+import local.hal.st31.android.shift.beans.ShiftRequestBean;
 import local.hal.st31.android.shift.beans.ShiftTypeBean;
+import local.hal.st31.android.shift.db.DataAccess;
+import local.hal.st31.android.shift.db.DatabaseHelper;
 import local.hal.st31.android.shift.utils.DateUtils;
+import local.hal.st31.android.shift.utils.GlobalUtils;
 
 public class ShiftSubmitFragment extends Fragment {
     private View fragmentView;
@@ -30,7 +49,15 @@ public class ShiftSubmitFragment extends Fragment {
     private RecyclerView shiftListView;
     private ShiftMonthListAdapter shiftMonthListAdapter;
     private TextView dateLabel;
+    private List<List<ShiftTypeBean>> dataList;
+    private DatabaseHelper _helper;
+    private SQLiteDatabase db;
+    int shiftId = 0;
+    int modifyVersion = 3;
 
+//    private static final String URL = "http://shift_backend.test/shift";
+    private static final String URL = "http://10.0.2.2/shift_backend/controllers/shift_controller.php";
+//    private static final String URL = "http://10.0.2.2/test/index.php";
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -42,8 +69,18 @@ public class ShiftSubmitFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         fragmentView = inflater.inflate(R.layout.fragment_shift_submit,container,false);
         shiftListView = fragmentView.findViewById(R.id.shiftListView);
-        initView();
+        _helper = new DatabaseHelper(getContext());
+        dataList = new ArrayList<>();
         return fragmentView;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        initView();
+        SharedPreferences ps = PreferenceManager.getDefaultSharedPreferences(getContext());
+        int a = ps.getInt("shiftId",0);
+        Log.e("versionaaa",a+"");
     }
 
     private void initView(){
@@ -52,10 +89,10 @@ public class ShiftSubmitFragment extends Fragment {
         int year = calendar.get(Calendar.YEAR);
         int month = calendar.get(Calendar.MONTH)+2;
         int days = DateUtils.getDaysByYearMonth(year,month);
-
-
+        ShiftTypeDataReceiver shiftTypeDataReceiver = new ShiftTypeDataReceiver();
+        shiftTypeDataReceiver.execute(URL);
         shiftMonthListAdapter = new ShiftMonthListAdapter(getContext());
-        shiftMonthListAdapter.setList(getTestData());
+        shiftMonthListAdapter.setList(dataList);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);//縦並び
         shiftListView.setLayoutManager(layoutManager);
@@ -66,13 +103,125 @@ public class ShiftSubmitFragment extends Fragment {
         cal.add(Calendar.MONTH, 1);
         dateLabel = fragmentView.findViewById(R.id.day_text);
         dateLabel.setText(cal.get(Calendar.YEAR)+"年"+(cal.get(Calendar.MONTH)+1)+"月");
-        dateLabel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+    }
 
-                Log.e("aaa",shiftMonthListAdapter.getShiftHopeList().size()+"");
+    private class ShiftTypeDataReceiver extends AsyncTask<String,Void,String> {
+
+        private static final String DEBUG_TAG = "ListReceiver";
+        @Override
+        protected String doInBackground(String... params) {
+            String urlStr = params[0];
+            HttpURLConnection con = null;
+            InputStream is = null;
+            String result = "";
+            try {
+                URL url = new URL(urlStr);
+                con = (HttpURLConnection) url.openConnection();
+                con.setRequestMethod("GET");
+                con.connect();
+                con.setConnectTimeout(2000);
+                is = con.getInputStream();
+
+                result = GlobalUtils.getInstance().is2String(is);
+
+            } catch (MalformedURLException ex) {
+                Log.e(DEBUG_TAG,"URL変換失敗",ex);
+            } catch (IOException ex) {
+                Log.e(DEBUG_TAG,"通信失敗aaa",ex);
             }
-        });
+            finally {
+                if(con != null){
+                    con.disconnect();
+                }
+                if(is!=null){
+                    try{
+                        is.close();
+                    }
+                    catch (IOException ex){
+                        Log.e(DEBUG_TAG,"InputStream解放失敗",ex);
+                    }
+                }
+            }
+            return  result;
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            try {
+                JSONObject jsonObject = new JSONObject(result);
+
+                JSONArray jsonArray = jsonObject.getJSONArray("list");
+
+
+                db = _helper.getWritableDatabase();
+
+                //shift_idとmodify_versionを取得(一意)
+
+                int numOfCol = 0;
+                for(int j = 0;j<jsonArray.length();j++){
+                    JSONObject dataObject = jsonArray.getJSONObject(j);
+                    shiftId = dataObject.getInt("shift_id");
+                    modifyVersion = dataObject.getInt("modify_version");
+                }
+                //SharedPreferencesの中に保存したshift_idとmodify_versionを取り出す
+                SharedPreferences ps = PreferenceManager.getDefaultSharedPreferences(getContext());
+                int savedShiftId = ps.getInt("shiftId",0);
+                int savedModifyVersion = ps.getInt("modifyVersion",0);
+
+                //同じ場合、変更なし、テーブル更新なし　同じではない場合テーブル更新
+                //TODO　サーバ側shift_typeテーブルフィールド変更した場合、こっちも変更
+                int num = 0;
+                if(shiftId != savedShiftId||modifyVersion != savedModifyVersion){
+                    ps.edit().putInt("shiftId",shiftId).putInt("modifyVersion",modifyVersion).apply();
+                    //既存table删除？？？？？
+                    for(int j = 0;j<jsonArray.length();j++){
+                        JSONObject dataObject = jsonArray.getJSONObject(j);
+                        ShiftTypeBean bean = new ShiftTypeBean();
+                        bean.setShiftTypeId(dataObject.getInt("type_id"));
+                        bean.setShiftId(dataObject.getInt("shift_id"));
+                        bean.setBeginTime(dataObject.getString("begin_time"));
+                        bean.setEndTime(dataObject.getString("end_time"));
+                        bean.setTypeName(dataObject.getString("type_name"));
+                        bean.setComment(dataObject.getString("comment"));
+                        list.add(bean);
+                        DataAccess.shiftTypeInsert(db,bean);
+                        num++;
+                    }
+                }
+
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private  List<ShiftRequestBean> getData(){
+        List<ShiftTypeBean> list = new ArrayList<>();
+        Calendar calendar = Calendar.getInstance();
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH)+2;
+        int days = DateUtils.getDaysByYearMonth(year,month);
+        for(int i = 1;i<=days;i++){
+            ShiftRequestBean shiftRequestBean = new ShiftRequestBean();
+            String date = year + "-" + month + "-" + i;
+            if(i < 10){
+                date = year + "-" + month + "-" + "0" + i;
+            }
+            for(ShiftTypeBean temp : list){
+                shiftRequestBean.setShiftId(temp.getShiftId());
+                shiftRequestBean.setShiftTypeId(temp.getShiftTypeId());
+                shiftRequestBean.setDate(date);
+                shiftRequestBean.setSelectedFlag(0);
+                DataAccess.shiftRequestInsert(db,shiftRequestBean);
+            }
+        }
+        
+        SharedPreferences ps = PreferenceManager.getDefaultSharedPreferences(getContext());
+        int shiftId = ps.getInt("shiftId",0);
+        List<ShiftRequestBean> data = new ArrayList<>();
+        data = DataAccess.getShiftRequestByShiftId(db,shiftId);
+        return data;
     }
 
     private  List<List<ShiftTypeBean>> getTestData() {

@@ -11,6 +11,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public DatabaseHelper(@Nullable Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
+//    static final String SELF_SCHEDULE_SQL = "CREATE TABLE selfSchedule (_id INTEGER PRIMARY KEY AUTOINCREMENT,work TEXT,memo TEXT,start_time TEXT,end_time TEXT,date DATE)";
 
     @Override
     public void onCreate(SQLiteDatabase db) {
@@ -26,6 +27,32 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         String sql = sb.toString();
 
         db.execSQL(sql);
+
+        StringBuilder sb2 = new StringBuilder();
+        sb2.append("CREATE TABLE shiftRequest (");
+        sb2.append("id INTEGER PRIMARY KEY AUTOINCREMENT,");
+        sb2.append("shift_type_id TEXT,");
+        sb2.append("shift_id TEXT,");
+        sb2.append("date TEXT,");
+        sb2.append("selected_flag INTEGER");
+        sb2.append(")");
+        String sql2 = sb2.toString();
+
+        db.execSQL(sql2);
+
+        StringBuilder sb3 = new StringBuilder();
+        sb3.append("CREATE TABLE shiftType (");
+        sb3.append("shift_type_id INTEGER PRIMARY KEY,");
+        sb3.append("shift_id INTEGER,");
+        sb3.append("begin_time TEXT,");
+        sb3.append("end_time TEXT,");
+        sb3.append("type_name TEXT,");
+        sb3.append("comment TEXT");
+        sb3.append(")");
+        String sql3 = sb3.toString();
+
+        db.execSQL(sql3);
+
     }
 
     @Override

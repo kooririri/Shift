@@ -14,6 +14,7 @@ import android.widget.TextView;
 
 import local.hal.st31.android.shift.fragment.HomeFragment;
 import local.hal.st31.android.shift.fragment.ShiftSubmitFragment;
+import local.hal.st31.android.shift.utils.GlobalUtils;
 
 public class MainActivity extends AppCompatActivity {
     private TextView mTextMessage;
@@ -33,6 +34,8 @@ public class MainActivity extends AppCompatActivity {
 //        mTextMessage = findViewById(R.id.message);
 //        navView.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
         initFragment();
+        GlobalUtils.getInstance().setContext(getApplicationContext());
+        GlobalUtils.getInstance().mainActivity = this;
     }
 
     private void initFragment(){

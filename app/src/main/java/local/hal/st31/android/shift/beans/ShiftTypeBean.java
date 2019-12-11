@@ -1,5 +1,7 @@
 package local.hal.st31.android.shift.beans;
 
+import android.support.annotation.NonNull;
+
 public class ShiftTypeBean {
     private int shiftId;//シフト自体ID
     private int shiftTypeId;//シフトの番タイプID　
@@ -13,6 +15,11 @@ public class ShiftTypeBean {
 
     }
 
+    @NonNull
+    @Override
+    public String toString() {
+        return this.typeName;
+    }
 
     public int getShiftId() {
         return shiftId;
