@@ -1,5 +1,7 @@
 package local.hal.st31.android.shift.beans;
 
+import android.support.annotation.NonNull;
+
 public class ShiftRequestBean {
 
     private int id;//シフト希望ID
@@ -10,6 +12,12 @@ public class ShiftRequestBean {
 
     public ShiftRequestBean(){
 
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        return this.date;
     }
 
     public int getId() {

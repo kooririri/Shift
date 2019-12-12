@@ -107,14 +107,29 @@ public class DataAccess {
         return stmt.executeInsert();
     }
 
-    public static List<Integer>  getAllShiftTypeIdByShiftId(SQLiteDatabase db, int shiftId){
-        List<Integer> list = new ArrayList<>();
-        String sql = "SELECT shift_type_id FROM shiftType WHERE shift_id = ?";
+    public static void deleteAllShiftType(SQLiteDatabase db){
+        db.delete("shiftType","shift_id > ?",new String[]{"0"});
+    }
+
+    public static List<ShiftTypeBean>  getAllShiftTypeByShiftId(SQLiteDatabase db, int shiftId){
+        List<ShiftTypeBean> list = new ArrayList<>();
+        String sql = "SELECT * FROM shiftType WHERE shift_id = ?";
         Cursor cursor = db.rawQuery(sql,new String[]{String.valueOf(shiftId)});
         if(cursor.moveToFirst()){
             do{
                 int shiftTypeId = cursor.getInt(cursor.getColumnIndex("shift_type_id"));
-                list.add(shiftTypeId);
+                String beginTime = cursor.getString(cursor.getColumnIndex("begin_time"));
+                String endTime = cursor.getString(cursor.getColumnIndex("end_time"));
+                String typeName = cursor.getString(cursor.getColumnIndex("type_name"));
+                String comment = cursor.getString(cursor.getColumnIndex("comment"));
+                ShiftTypeBean bean = new ShiftTypeBean();
+                bean.setShiftId(shiftId);
+                bean.setShiftTypeId(shiftTypeId);
+                bean.setBeginTime(beginTime);
+                bean.setEndTime(endTime);
+                bean.setComment(comment);
+                bean.setTypeName(typeName);
+                list.add(bean);
             }
             while(cursor.moveToNext());
         }
@@ -126,7 +141,7 @@ public class DataAccess {
     public static long shiftRequestInsert(SQLiteDatabase db, ShiftRequestBean shiftRequestBean){
         String sql = "INSERT INTO shiftRequest(shift_id,date,shift_type_id,selected_flag)VALUES(?,?,?,?)";
         SQLiteStatement stmt =db.compileStatement(sql);
-        stmt.bindLong(1,shiftRequestBean.getShiftTypeId());
+        stmt.bindLong(1,shiftRequestBean.getShiftId());
         stmt.bindString(2,shiftRequestBean.getDate());
         stmt.bindLong(3,shiftRequestBean.getShiftTypeId());
         stmt.bindLong(4,shiftRequestBean.getSelectedFlag());
@@ -150,10 +165,12 @@ public class DataAccess {
                 bean.setShiftId(shiftID);
                 bean.setDate(date);
                 bean.setSelectedFlag(selectedFlag);
+                list.add(bean);
             }
             while(cursor.moveToNext());
         }
         cursor.close();
         return list;
     }
+
 }

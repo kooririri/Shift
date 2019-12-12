@@ -2,6 +2,7 @@ package local.hal.st31.android.shift.fragment;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -54,6 +55,8 @@ public class ShiftSubmitFragment extends Fragment {
     private SQLiteDatabase db;
     int shiftId = 0;
     int modifyVersion = 3;
+//    List<List<ShiftTypeBean>> data;
+    List<ShiftRequestBean> data;
 
 //    private static final String URL = "http://shift_backend.test/shift";
     private static final String URL = "http://10.0.2.2/shift_backend/controllers/shift_controller.php";
@@ -70,7 +73,10 @@ public class ShiftSubmitFragment extends Fragment {
         fragmentView = inflater.inflate(R.layout.fragment_shift_submit,container,false);
         shiftListView = fragmentView.findViewById(R.id.shiftListView);
         _helper = new DatabaseHelper(getContext());
-        dataList = new ArrayList<>();
+        db = _helper.getWritableDatabase();
+        data = getData();
+
+
         return fragmentView;
     }
 
@@ -78,26 +84,21 @@ public class ShiftSubmitFragment extends Fragment {
     public void onResume() {
         super.onResume();
         initView();
-        SharedPreferences ps = PreferenceManager.getDefaultSharedPreferences(getContext());
-        int a = ps.getInt("shiftId",0);
-        Log.e("versionaaa",a+"");
+        data = getData();
+        Log.e("pxl",data.toString());
+
     }
 
     private void initView(){
         //次の月（シフト）の日数を取得
-        Calendar calendar = Calendar.getInstance();
-        int year = calendar.get(Calendar.YEAR);
-        int month = calendar.get(Calendar.MONTH)+2;
-        int days = DateUtils.getDaysByYearMonth(year,month);
         ShiftTypeDataReceiver shiftTypeDataReceiver = new ShiftTypeDataReceiver();
         shiftTypeDataReceiver.execute(URL);
         shiftMonthListAdapter = new ShiftMonthListAdapter(getContext());
-        shiftMonthListAdapter.setList(dataList);
+        shiftMonthListAdapter.setList(getTestData());
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);//縦並び
         shiftListView.setLayoutManager(layoutManager);
         shiftListView.setAdapter(shiftMonthListAdapter);
-
         Calendar cal = Calendar.getInstance();
         cal.setTime(new Date());
         cal.add(Calendar.MONTH, 1);
@@ -151,15 +152,18 @@ public class ShiftSubmitFragment extends Fragment {
                 JSONObject jsonObject = new JSONObject(result);
 
                 JSONArray jsonArray = jsonObject.getJSONArray("list");
-
-
+                Calendar calendar = Calendar.getInstance();
+                calendar.add(Calendar.MONTH,+1);
+                int year = calendar.get(Calendar.YEAR);
+                int month = calendar.get(Calendar.MONTH)+1;
+                int days = DateUtils.getDaysByYearMonth(year,month);
                 db = _helper.getWritableDatabase();
 
                 //shift_idとmodify_versionを取得(一意)
-
+                List<ShiftTypeBean> list = new ArrayList<>();
                 int numOfCol = 0;
-                for(int j = 0;j<jsonArray.length();j++){
-                    JSONObject dataObject = jsonArray.getJSONObject(j);
+                for(int num1 = 0;num1<jsonArray.length();num1++){
+                    JSONObject dataObject = jsonArray.getJSONObject(num1);
                     shiftId = dataObject.getInt("shift_id");
                     modifyVersion = dataObject.getInt("modify_version");
                 }
@@ -170,12 +174,13 @@ public class ShiftSubmitFragment extends Fragment {
 
                 //同じ場合、変更なし、テーブル更新なし　同じではない場合テーブル更新
                 //TODO　サーバ側shift_typeテーブルフィールド変更した場合、こっちも変更
-                int num = 0;
+//                int num = 0;
                 if(shiftId != savedShiftId||modifyVersion != savedModifyVersion){
                     ps.edit().putInt("shiftId",shiftId).putInt("modifyVersion",modifyVersion).apply();
+                    DataAccess.deleteAllShiftType(db);
                     //既存table删除？？？？？
-                    for(int j = 0;j<jsonArray.length();j++){
-                        JSONObject dataObject = jsonArray.getJSONObject(j);
+                    for(int num2 = 0;num2<jsonArray.length();num2++){
+                        JSONObject dataObject = jsonArray.getJSONObject(num2);
                         ShiftTypeBean bean = new ShiftTypeBean();
                         bean.setShiftTypeId(dataObject.getInt("type_id"));
                         bean.setShiftId(dataObject.getInt("shift_id"));
@@ -185,7 +190,23 @@ public class ShiftSubmitFragment extends Fragment {
                         bean.setComment(dataObject.getString("comment"));
                         list.add(bean);
                         DataAccess.shiftTypeInsert(db,bean);
-                        num++;
+//                        num++;
+                    }
+                    for(int i = 1;i<=days;i++){
+                        ShiftRequestBean shiftRequestBean = new ShiftRequestBean();
+                        String date = year + "-" + month + "-" + i;
+                        if(i < 10){
+                            date = year + "-" + month + "-" + "0" + i;
+                        }
+                        for(int j=0;j<list.size();j++){
+                            int tempShiftId = list.get(j).getShiftId();
+                            shiftRequestBean.setShiftId(tempShiftId);
+                            int tempTypeId = list.get(j).getShiftTypeId();
+                            shiftRequestBean.setShiftTypeId(tempTypeId);
+                            shiftRequestBean.setDate(date);
+                            shiftRequestBean.setSelectedFlag(0);
+                            DataAccess.shiftRequestInsert(db,shiftRequestBean);
+                        }
                     }
                 }
 
@@ -196,31 +217,36 @@ public class ShiftSubmitFragment extends Fragment {
         }
     }
 
+//    private  List<List<ShiftTypeBean>> getData(){
+//        db = _helper.getWritableDatabase();
+//        SharedPreferences ps = PreferenceManager.getDefaultSharedPreferences(getContext());
+//        int shiftId = ps.getInt("shiftId",0);
+//        Log.e("asdd",shiftId+"");
+//        List<List<ShiftTypeBean>> data = new ArrayList<>();
+//
+//        Calendar calendar = Calendar.getInstance();
+//        calendar.add(Calendar.MONTH,+1);
+//        int year = calendar.get(Calendar.YEAR);
+//        int month = calendar.get(Calendar.MONTH)+1;
+//        int days = DateUtils.getDaysByYearMonth(year,month);
+//        List<ShiftTypeBean> list;
+//        list = DataAccess.getAllShiftTypeByShiftId(db,shiftId);
+//        for(int i = 1;i<=days;i++){
+//
+//            data.add(list);
+//        }
+//
+//        return data;
+//    }
+
+
     private  List<ShiftRequestBean> getData(){
-        List<ShiftTypeBean> list = new ArrayList<>();
-        Calendar calendar = Calendar.getInstance();
-        int year = calendar.get(Calendar.YEAR);
-        int month = calendar.get(Calendar.MONTH)+2;
-        int days = DateUtils.getDaysByYearMonth(year,month);
-        for(int i = 1;i<=days;i++){
-            ShiftRequestBean shiftRequestBean = new ShiftRequestBean();
-            String date = year + "-" + month + "-" + i;
-            if(i < 10){
-                date = year + "-" + month + "-" + "0" + i;
-            }
-            for(ShiftTypeBean temp : list){
-                shiftRequestBean.setShiftId(temp.getShiftId());
-                shiftRequestBean.setShiftTypeId(temp.getShiftTypeId());
-                shiftRequestBean.setDate(date);
-                shiftRequestBean.setSelectedFlag(0);
-                DataAccess.shiftRequestInsert(db,shiftRequestBean);
-            }
-        }
-        
+        db = _helper.getWritableDatabase();
         SharedPreferences ps = PreferenceManager.getDefaultSharedPreferences(getContext());
         int shiftId = ps.getInt("shiftId",0);
         List<ShiftRequestBean> data = new ArrayList<>();
         data = DataAccess.getShiftRequestByShiftId(db,shiftId);
+
         return data;
     }
 
