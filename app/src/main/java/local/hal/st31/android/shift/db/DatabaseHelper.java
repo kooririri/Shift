@@ -30,7 +30,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         StringBuilder sb2 = new StringBuilder();
         sb2.append("CREATE TABLE shiftRequest (");
-        sb2.append("id INTEGER PRIMARY KEY AUTOINCREMENT,");
+        sb2.append("id TEXT PRIMARY KEY,");
         sb2.append("shift_type_id INTEGER,");
         sb2.append("shift_id INTEGER,");
         sb2.append("date TEXT,");
@@ -47,7 +47,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         sb3.append("begin_time TEXT,");
         sb3.append("end_time TEXT,");
         sb3.append("type_name TEXT,");
-        sb3.append("comment TEXT");
+        sb3.append("comment TEXT,");
         sb3.append("selected_flag INTEGER");
         sb3.append(")");
         String sql3 = sb3.toString();

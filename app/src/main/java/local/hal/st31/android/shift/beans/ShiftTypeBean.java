@@ -18,7 +18,7 @@ public class ShiftTypeBean {
     @NonNull
     @Override
     public String toString() {
-        return this.typeName;
+        return this.selectedFlag+"  ";
     }
 
     public int getShiftId() {

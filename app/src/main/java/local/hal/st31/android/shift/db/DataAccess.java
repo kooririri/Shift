@@ -1,5 +1,6 @@
 package local.hal.st31.android.shift.db;
 
+import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -95,16 +96,17 @@ public class DataAccess {
         return dates;
     }
 
-    public static long shiftTypeInsert(SQLiteDatabase db, ShiftTypeBean shiftTypeBean){
-        String sql = "INSERT INTO shiftType(shift_type_id,shift_id,begin_time,end_time,type_name,comment)VALUES(?,?,?,?,?,?)";
-        SQLiteStatement stmt =db.compileStatement(sql);
-        stmt.bindLong(1,shiftTypeBean.getShiftTypeId());
-        stmt.bindLong(2,shiftTypeBean.getShiftId());
-        stmt.bindString(3,shiftTypeBean.getBeginTime());
-        stmt.bindString(4,shiftTypeBean.getEndTime());
-        stmt.bindString(5,shiftTypeBean.getTypeName());
-        stmt.bindString(6,shiftTypeBean.getComment());
-        return stmt.executeInsert();
+    public static void shiftTypeReplace(SQLiteDatabase db, ShiftTypeBean bean){
+        ContentValues values = new ContentValues();
+        values.put("shift_type_id",bean.getShiftTypeId());
+        values.put("shift_id",bean.getShiftId());
+        values.put("begin_time",bean.getBeginTime());
+        values.put("end_time",bean.getEndTime());
+        values.put("type_name",bean.getTypeName());
+        values.put("comment",bean.getComment());
+        values.put("selected_flag",bean.getSelectedFlag());
+        db.replace("shiftType",null,values);
+        values.clear();
     }
 
     public static void deleteAllShiftType(SQLiteDatabase db){
@@ -136,6 +138,7 @@ public class DataAccess {
                 String endTime = cursor.getString(cursor.getColumnIndex("end_time"));
                 String typeName = cursor.getString(cursor.getColumnIndex("type_name"));
                 String comment = cursor.getString(cursor.getColumnIndex("comment"));
+                int selectedFlag = cursor.getInt(cursor.getColumnIndex("selected_flag"));
                 ShiftTypeBean bean = new ShiftTypeBean();
                 bean.setShiftId(shiftId);
                 bean.setShiftTypeId(shiftTypeId);
@@ -143,6 +146,7 @@ public class DataAccess {
                 bean.setEndTime(endTime);
                 bean.setComment(comment);
                 bean.setTypeName(typeName);
+                bean.setSelectedFlag(selectedFlag);
                 list.add(bean);
             }
             while(cursor.moveToNext());
@@ -152,14 +156,15 @@ public class DataAccess {
     }
 
 
-    public static long shiftRequestInsert(SQLiteDatabase db, ShiftRequestBean shiftRequestBean){
-        String sql = "INSERT INTO shiftRequest(shift_id,date,shift_type_id,selected_flag)VALUES(?,?,?,?)";
-        SQLiteStatement stmt =db.compileStatement(sql);
-        stmt.bindLong(1,shiftRequestBean.getShiftId());
-        stmt.bindString(2,shiftRequestBean.getDate());
-        stmt.bindLong(3,shiftRequestBean.getShiftTypeId());
-        stmt.bindLong(4,shiftRequestBean.getSelectedFlag());
-        return stmt.executeInsert();
+    public static void shiftRequestReplace(SQLiteDatabase db, ShiftRequestBean bean){
+        ContentValues values = new ContentValues();
+        values.put("id",bean.getId());
+        values.put("shift_id",bean.getShiftId());
+        values.put("date",bean.getDate());
+        values.put("shift_type_id",bean.getShiftTypeId());
+        values.put("selected_flag",bean.getSelectedFlag());
+        db.replace("shiftRequest",null,values);
+        values.clear();
     }
 
     public static ShiftTypeBean getOneShiftTypeBean(SQLiteDatabase db,int shiftTypeId){
@@ -187,31 +192,22 @@ public class DataAccess {
         return bean;
     }
 
-    public static List<ShiftRequestBean> getShiftRequestByShiftId(SQLiteDatabase db,int shiftId){
+    public static List<ShiftRequestBean> getShiftRequestByShiftId(SQLiteDatabase db,int shiftId,int selectedFlag){
         List<ShiftRequestBean> list = new ArrayList<>();
-        String sql = "SELECT * FROM shiftRequest r LEFT JOIN shiftType t on r.shift_type_id = t.shift_type_id WHERE r.shift_id = ?";
-        Cursor cursor = db.rawQuery(sql,new String[]{String.valueOf(shiftId)});
+        String sql = "SELECT * FROM shiftRequest WHERE shift_id = ? AND selected_flag = ?";
+        Cursor cursor = db.rawQuery(sql,new String[]{String.valueOf(shiftId),String.valueOf(selectedFlag)});
         if(cursor.moveToFirst()){
             do{
-                int id = cursor.getInt(cursor.getColumnIndex("id"));
+                String id = cursor.getString(cursor.getColumnIndex("id"));
                 int shiftID = cursor.getInt(cursor.getColumnIndex("shift_id"));
                 int shiftTypeId = cursor.getInt(cursor.getColumnIndex("shift_type_id"));
                 String date = cursor.getString(cursor.getColumnIndex("date"));
-                int selectedFlag = cursor.getInt(cursor.getColumnIndex("selected_flag"));
-                String beginTime = cursor.getString(cursor.getColumnIndex("begin_time"));
-                String endTime = cursor.getString(cursor.getColumnIndex("end_time"));
-                String typeName = cursor.getString(cursor.getColumnIndex("type_name"));
-                String comment = cursor.getString(cursor.getColumnIndex("comment"));
                 ShiftRequestBean bean = new ShiftRequestBean();
                 bean.setId(id);
                 bean.setShiftTypeId(shiftTypeId);
                 bean.setShiftId(shiftID);
                 bean.setDate(date);
                 bean.setSelectedFlag(selectedFlag);
-                bean.setBeginTime(beginTime);
-                bean.setEndTime(endTime);
-                bean.setTypeName(typeName);
-                bean.setComment(comment);
                 list.add(bean);
             }
             while(cursor.moveToNext());
@@ -220,4 +216,5 @@ public class DataAccess {
         return list;
     }
 
+    
 }
