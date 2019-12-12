@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import local.hal.st31.android.shift.R;
+
 import local.hal.st31.android.shift.beans.ShiftTypeBean;
 import local.hal.st31.android.shift.beans.TempBean;
 import local.hal.st31.android.shift.utils.DateUtils;
@@ -65,7 +66,7 @@ public class ShiftMonthListAdapter extends RecyclerView.Adapter<ShiftMonthListAd
         shiftMonthListViewHolder.textView.setText((position+1) + "日");
         ShiftOptionAdapter shiftOptionAdapter = new ShiftOptionAdapter(viewGroup.getContext());
         shiftOptionAdapter.setShiftList(data);
-
+        shiftOptionAdapter.notifyDataSetChanged();
         LinearLayoutManager layoutManager = new LinearLayoutManager(viewGroup.getContext());
         layoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);//横並び
         shiftMonthListViewHolder.recyclerView.setLayoutManager(layoutManager);
@@ -75,23 +76,13 @@ public class ShiftMonthListAdapter extends RecyclerView.Adapter<ShiftMonthListAd
         shiftOptionAdapter.setListener(new ShiftOptionAdapter.onShiftTypeClickListener() {
             @Override
             public void onItemClick(int i, ShiftTypeBean res) {
-                Calendar calendar = Calendar.getInstance();
-                calendar.setTime(new Date());
-                calendar.add(Calendar.MONTH, 1);
-                calendar.set(Calendar.DAY_OF_MONTH, i + 1);
-                Date date = calendar.getTime();
-                String shiftHopeDate = DateUtils.date2String(date, "yyyy-MM-dd");
-
-
 
                 if (res.getSelectedFlag() == 0) {
                     res.setSelectedFlag(1);
-
                 } else {
                     res.setSelectedFlag(0);
 
                 }
-
             }
         });
     }
@@ -103,7 +94,7 @@ public class ShiftMonthListAdapter extends RecyclerView.Adapter<ShiftMonthListAd
 
     public void setList(List<List<ShiftTypeBean>> list) {
         this.list = list;
-//        notifyDataSetChanged();
+        notifyDataSetChanged();
     }
 
 

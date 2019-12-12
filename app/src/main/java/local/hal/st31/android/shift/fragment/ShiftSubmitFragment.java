@@ -73,8 +73,7 @@ public class ShiftSubmitFragment extends Fragment {
         fragmentView = inflater.inflate(R.layout.fragment_shift_submit,container,false);
         shiftListView = fragmentView.findViewById(R.id.shiftListView);
         _helper = new DatabaseHelper(getContext());
-        db = _helper.getWritableDatabase();
-        data = getData();
+
 
 
         return fragmentView;
@@ -84,9 +83,9 @@ public class ShiftSubmitFragment extends Fragment {
     public void onResume() {
         super.onResume();
         initView();
-        data = getData();
-        Log.e("pxl",data.toString());
 
+        Log.e("kkk",dataList.toString());
+        Log.e("kkk",getData().toString());
     }
 
     private void initView(){
@@ -94,7 +93,9 @@ public class ShiftSubmitFragment extends Fragment {
         ShiftTypeDataReceiver shiftTypeDataReceiver = new ShiftTypeDataReceiver();
         shiftTypeDataReceiver.execute(URL);
         shiftMonthListAdapter = new ShiftMonthListAdapter(getContext());
-        shiftMonthListAdapter.setList(getTestData());
+        dataList = getData();
+        shiftMonthListAdapter.setList(dataList);
+        shiftMonthListAdapter.notifyDataSetChanged();
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);//縦並び
         shiftListView.setLayoutManager(layoutManager);
@@ -217,38 +218,57 @@ public class ShiftSubmitFragment extends Fragment {
         }
     }
 
-//    private  List<List<ShiftTypeBean>> getData(){
-//        db = _helper.getWritableDatabase();
-//        SharedPreferences ps = PreferenceManager.getDefaultSharedPreferences(getContext());
-//        int shiftId = ps.getInt("shiftId",0);
-//        Log.e("asdd",shiftId+"");
-//        List<List<ShiftTypeBean>> data = new ArrayList<>();
-//
-//        Calendar calendar = Calendar.getInstance();
-//        calendar.add(Calendar.MONTH,+1);
-//        int year = calendar.get(Calendar.YEAR);
-//        int month = calendar.get(Calendar.MONTH)+1;
-//        int days = DateUtils.getDaysByYearMonth(year,month);
-//        List<ShiftTypeBean> list;
-//        list = DataAccess.getAllShiftTypeByShiftId(db,shiftId);
-//        for(int i = 1;i<=days;i++){
-//
-//            data.add(list);
-//        }
-//
-//        return data;
-//    }
-
-
-    private  List<ShiftRequestBean> getData(){
+    private  List<List<ShiftTypeBean>> getData(){
         db = _helper.getWritableDatabase();
         SharedPreferences ps = PreferenceManager.getDefaultSharedPreferences(getContext());
         int shiftId = ps.getInt("shiftId",0);
-        List<ShiftRequestBean> data = new ArrayList<>();
-        data = DataAccess.getShiftRequestByShiftId(db,shiftId);
+        Log.e("asdd",shiftId+"");
+        List<List<ShiftTypeBean>> data = new ArrayList<>();
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.MONTH,+1);
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH)+1;
+        int days = DateUtils.getDaysByYearMonth(year,month);
+        List<ShiftTypeBean> list;
+        list = DataAccess.getAllShiftTypeByShiftId(db,shiftId);
+        int num = DataAccess.getShiftTypeNum(db,shiftId);
+        Log.e("asdd",num+"");
+        for(int i = 1;i<=days;i++){
+            List<ShiftTypeBean> a =new ArrayList<>();
+
+            for(int j = 1 ;j<=num;j++){
+                ShiftTypeBean bean = new ShiftTypeBean();
+                ShiftTypeBean test = DataAccess.getOneShiftTypeBean(db,j);
+                bean.setTypeName(test.getTypeName());
+                bean.setComment(test.getComment());
+                bean.setEndTime(test.getEndTime());
+                bean.setBeginTime(test.getBeginTime());
+                bean.setShiftTypeId(test.getShiftTypeId());
+                bean.setShiftId(test.getShiftId());
+                a.add(bean);
+            }
+
+
+
+
+            data.add(a);
+
+        }
 
         return data;
     }
+
+
+//    private  List<ShiftRequestBean> getData(){
+//        db = _helper.getWritableDatabase();
+//        SharedPreferences ps = PreferenceManager.getDefaultSharedPreferences(getContext());
+//        int shiftId = ps.getInt("shiftId",0);
+//        List<ShiftRequestBean> data = new ArrayList<>();
+//        data = DataAccess.getShiftRequestByShiftId(db,shiftId);
+//
+//        return data;
+//    }
 
     private  List<List<ShiftTypeBean>> getTestData() {
         Calendar calendar = Calendar.getInstance();
@@ -284,22 +304,22 @@ public class ShiftSubmitFragment extends Fragment {
             bean.setTypeName("C勤");
             bean.setComment("休憩1時間");
             list.add(bean);
-            bean = new ShiftTypeBean();
-            bean.setShiftId(4);
-            bean.setShiftTypeId(4);
-            bean.setBeginTime("12:00");
-            bean.setEndTime("21:00");
-            bean.setTypeName("D勤");
-            bean.setComment("休憩1時間");
-            list.add(bean);
-            bean = new ShiftTypeBean();
-            bean.setShiftId(5);
-            bean.setShiftTypeId(5);
-            bean.setBeginTime("12:00");
-            bean.setEndTime("21:00");
-            bean.setTypeName("E勤");
-            bean.setComment("休憩1時間");
-            list.add(bean);
+//            bean = new ShiftTypeBean();
+//            bean.setShiftId(4);
+//            bean.setShiftTypeId(4);
+//            bean.setBeginTime("12:00");
+//            bean.setEndTime("21:00");
+//            bean.setTypeName("D勤");
+//            bean.setComment("休憩1時間");
+//            list.add(bean);
+//            bean = new ShiftTypeBean();
+//            bean.setShiftId(5);
+//            bean.setShiftTypeId(5);
+//            bean.setBeginTime("12:00");
+//            bean.setEndTime("21:00");
+//            bean.setTypeName("E勤");
+//            bean.setComment("休憩1時間");
+//            list.add(bean);
 
             data.add(list);
         }

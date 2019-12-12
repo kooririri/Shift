@@ -111,6 +111,20 @@ public class DataAccess {
         db.delete("shiftType","shift_id > ?",new String[]{"0"});
     }
 
+    public static int getShiftTypeNum(SQLiteDatabase db,int shiftId){
+        int num = 0;
+        String sql = "SELECT COUNT(shift_type_id) AS num FROM shiftType WHERE shift_id = ?";
+        Cursor cursor = db.rawQuery(sql,new String[]{String.valueOf(shiftId)});
+        if(cursor.moveToFirst()){
+            do{
+                num = cursor.getInt(cursor.getColumnIndex("num"));
+            }
+            while(cursor.moveToNext());
+        }
+        cursor.close();
+        return num;
+    }
+
     public static List<ShiftTypeBean>  getAllShiftTypeByShiftId(SQLiteDatabase db, int shiftId){
         List<ShiftTypeBean> list = new ArrayList<>();
         String sql = "SELECT * FROM shiftType WHERE shift_id = ?";
@@ -148,9 +162,34 @@ public class DataAccess {
         return stmt.executeInsert();
     }
 
+    public static ShiftTypeBean getOneShiftTypeBean(SQLiteDatabase db,int shiftTypeId){
+        String sql = "SELECT * FROM shiftType WHERE shift_type_id = ?";
+        Cursor cursor = db.rawQuery(sql,new String[]{String.valueOf(shiftTypeId)});
+        ShiftTypeBean bean = new ShiftTypeBean();
+        if(cursor.moveToFirst()){
+            do{
+                int shiftID = cursor.getInt(cursor.getColumnIndex("shift_id"));
+                int shiftTypeID = cursor.getInt(cursor.getColumnIndex("shift_type_id"));
+                String beginTime = cursor.getString(cursor.getColumnIndex("begin_time"));
+                String endTime = cursor.getString(cursor.getColumnIndex("end_time"));
+                String typeName = cursor.getString(cursor.getColumnIndex("type_name"));
+                String comment = cursor.getString(cursor.getColumnIndex("comment"));
+                bean.setShiftTypeId(shiftTypeId);
+                bean.setShiftId(shiftID);
+                bean.setBeginTime(beginTime);
+                bean.setEndTime(endTime);
+                bean.setTypeName(typeName);
+                bean.setComment(comment);
+            }
+            while(cursor.moveToNext());
+        }
+        cursor.close();
+        return bean;
+    }
+
     public static List<ShiftRequestBean> getShiftRequestByShiftId(SQLiteDatabase db,int shiftId){
         List<ShiftRequestBean> list = new ArrayList<>();
-        String sql = "SELECT * FROM shiftRequest WHERE shift_id = ?";
+        String sql = "SELECT * FROM shiftRequest r LEFT JOIN shiftType t on r.shift_type_id = t.shift_type_id WHERE r.shift_id = ?";
         Cursor cursor = db.rawQuery(sql,new String[]{String.valueOf(shiftId)});
         if(cursor.moveToFirst()){
             do{
@@ -159,12 +198,20 @@ public class DataAccess {
                 int shiftTypeId = cursor.getInt(cursor.getColumnIndex("shift_type_id"));
                 String date = cursor.getString(cursor.getColumnIndex("date"));
                 int selectedFlag = cursor.getInt(cursor.getColumnIndex("selected_flag"));
+                String beginTime = cursor.getString(cursor.getColumnIndex("begin_time"));
+                String endTime = cursor.getString(cursor.getColumnIndex("end_time"));
+                String typeName = cursor.getString(cursor.getColumnIndex("type_name"));
+                String comment = cursor.getString(cursor.getColumnIndex("comment"));
                 ShiftRequestBean bean = new ShiftRequestBean();
                 bean.setId(id);
                 bean.setShiftTypeId(shiftTypeId);
                 bean.setShiftId(shiftID);
                 bean.setDate(date);
                 bean.setSelectedFlag(selectedFlag);
+                bean.setBeginTime(beginTime);
+                bean.setEndTime(endTime);
+                bean.setTypeName(typeName);
+                bean.setComment(comment);
                 list.add(bean);
             }
             while(cursor.moveToNext());
