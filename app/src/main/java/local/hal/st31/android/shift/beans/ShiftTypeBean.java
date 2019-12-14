@@ -10,6 +10,8 @@ public class ShiftTypeBean {
     private String typeName;//シフト番名 例:A勤
     private String comment;//説明とかメモ
     private int selectedFlag = 0;//選択されたら1、外したら0、デフォルトは0
+    private int shiftRequestId;
+    private String date;
 
     public ShiftTypeBean(){
 
@@ -75,5 +77,21 @@ public class ShiftTypeBean {
 
     public void setSelectedFlag(int selectedFlag) {
         this.selectedFlag = selectedFlag;
+    }
+
+    public int getShiftRequestId() {
+        return shiftRequestId;
+    }
+
+    public void setShiftRequestId(int shiftRequestId) {
+        this.shiftRequestId = shiftRequestId;
+    }
+
+    public String getDate() {
+        return date;
+    }
+
+    public void setDate(String date) {
+        this.date = date;
     }
 }
