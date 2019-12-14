@@ -325,17 +325,7 @@ public class ShiftSubmitFragment extends Fragment {
         }
         return data;
     }
-
-
-//    private  List<ShiftRequestBean> getData(){
-//        db = _helper.getWritableDatabase();
-//        SharedPreferences ps = PreferenceManager.getDefaultSharedPreferences(getContext());
-//        int shiftId = ps.getInt("shiftId",0);
-//        List<ShiftRequestBean> data = new ArrayList<>();
-//        data = DataAccess.getShiftRequestByShiftId(db,shiftId);
-//
-//        return data;
-//    }
+    
 
     private  List<List<ShiftTypeBean>> getTestData() {
         Calendar calendar = Calendar.getInstance();
