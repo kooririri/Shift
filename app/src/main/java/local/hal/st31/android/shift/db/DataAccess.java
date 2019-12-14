@@ -7,8 +7,10 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import local.hal.st31.android.shift.beans.SelfScheduleBean;
 import local.hal.st31.android.shift.beans.ShiftRequestBean;
