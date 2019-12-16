@@ -63,6 +63,7 @@ public class ShiftSubmitFragment extends Fragment {
     private DatabaseHelper _helper;
     private SQLiteDatabase db;
     private Button submitButton;
+    int savedId = 0;
     int shiftId = 0;
     int modifyVersion = 3;
     int year;
@@ -70,8 +71,8 @@ public class ShiftSubmitFragment extends Fragment {
 
 
 //    private static final String URL = "http://shift_backend.test/shift";
-    private static final String URLGet = "http://10.0.2.2/shift_app_backend/controllers/shift_controller.php";
-    private static final String URLPost = "http://10.0.2.2/shift_backend/controllers/shift_controller.php";
+    private static final String URLPost1 = "http://10.0.2.2/shift_app_backend/controllers/shift_controller1.php";
+    private static final String URLPost2= "http://10.0.2.2/shift_app_backend/controllers/shift_controller2.php";
 //    private static final String URL = "http://10.0.2.2/test/index.php";
 
     @Override
@@ -104,6 +105,14 @@ public class ShiftSubmitFragment extends Fragment {
     private void initView(){
         //次の月（シフト）の日数を取得
         SharedPreferences sp = GlobalUtils.getInstance().mainActivity.getSharedPreferences("login", GlobalUtils.getInstance().context.MODE_PRIVATE);
+        savedId= sp.getInt("userId",0);
+        Log.e("oko","idは"+savedId);
+        JSONObject userIdObject = new JSONObject();
+        try {
+            userIdObject.put("user_id",savedId);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
         ShiftTypeDataReceiver shiftTypeDataReceiver = new ShiftTypeDataReceiver();
         shiftTypeDataReceiver.execute(URL);
         shiftMonthListAdapter = new ShiftMonthListAdapter(getContext());
@@ -154,7 +163,8 @@ public class ShiftSubmitFragment extends Fragment {
         private static final String DEBUG_TAG = "ShiftTypeDataReceiver";
         @Override
         protected String doInBackground(String... params) {
-            String urlStr = params[0];
+            String uri = params[0];
+            String jsonData = params[1];
             HttpURLConnection con = null;
             InputStream is = null;
             String result = "";

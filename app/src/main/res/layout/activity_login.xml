@@ -34,7 +34,7 @@
             android:paddingTop="20dp"
             android:background="#99000000">
             <EditText
-                android:id="@+id/userName"
+                android:id="@+id/mail"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@null"
@@ -43,7 +43,7 @@
                 android:layout_marginLeft="50dp"
                 android:textColor="#9F9FA0"
                 android:textColorHint="#9F9FA0"
-                android:hint="your username"/>
+                android:hint="your mail"/>
 
             <View
                 android:layout_width="match_parent"

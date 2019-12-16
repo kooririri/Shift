@@ -26,10 +26,10 @@ import java.net.URL;
 public class LoginActivity extends AppCompatActivity {
 
     private static final String ACCESS_URL = "http://10.0.2.2/shift_app_backend/controllers/login_controller.php";
-    private String userName;
+    private String mail;
     private String password;
     private String nickName = null;
-    EditText etUserName;
+    EditText etMail;
     EditText etPassword;
     private int status = 0;
 
@@ -45,30 +45,29 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void init() {
-        etUserName = findViewById(R.id.userName);
+        etMail = findViewById(R.id.mail);
         etPassword = findViewById(R.id.password);
 
         SharedPreferences sp = getSharedPreferences("login", getApplicationContext().MODE_PRIVATE);
-        String savedUserName = sp.getString("userName",null);
+        String savedMail= sp.getString("mail",null);
         String savedPassword = sp.getString("password",null);
 
-        if(savedUserName != null && savedPassword !=null){
+        if(savedMail != null && savedPassword !=null){
             LoginThread loginThread = new LoginThread();
-            loginThread.execute(ACCESS_URL,savedUserName,savedPassword);
+            loginThread.execute(ACCESS_URL,savedMail,savedPassword);
         }
     }
 
     public void loginButtonClick(View view){
-        userName = etUserName.getText().toString();
+        mail = etMail.getText().toString();
         password = etPassword.getText().toString();
-        if(userName.equals("")){
+        if(mail.equals("")){
             Toast.makeText(getApplicationContext(),"メールアドレスを入力してください",Toast.LENGTH_LONG).show();
         }else if(password.equals("")){
             Toast.makeText(getApplicationContext(),"パスワードを入力してください",Toast.LENGTH_LONG).show();
         }else{
             LoginThread loginThread = new LoginThread();
-            loginThread.execute(ACCESS_URL,userName,password);
-            Log.e("loginl","clicked"+userName+password);
+            loginThread.execute(ACCESS_URL,mail,password);
         }
     }
 
@@ -78,10 +77,10 @@ public class LoginActivity extends AppCompatActivity {
         @Override
         protected String doInBackground(String... params) {
             String uri = params[0];
-            String strUserName = params[1];
+            String strmail = params[1];
             String strPassword = params[2];
 
-            String postData ="user_name="+strUserName+"&password="+strPassword;
+            String postData ="mail="+strmail+"&password="+strPassword;
             HttpURLConnection con = null;
             InputStream is = null;
             String result = "";
@@ -126,11 +125,13 @@ public class LoginActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(String result) {
-            String user = null;
+            String mail = null;
             String pass = null;
+            int userId = 0;
             try {
                 JSONObject object = new JSONObject(result);
-                user = object.getString("email");
+                userId = object.getInt("user_id");
+                mail = object.getString("email");
                 pass = object.getString("password");
                 nickName = object.getString("nickname");
                 status = object.getInt("status");
@@ -138,7 +139,7 @@ public class LoginActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
             SharedPreferences sp = getSharedPreferences("login", getApplicationContext().MODE_PRIVATE);
-            sp.edit().putString("userName",user).putString("password",pass).apply();
+            sp.edit().putString("mail",mail).putString("password",pass).putInt("userId",userId).apply();
             if(status == 1){
                 Intent intent = new Intent(getApplicationContext(),MainActivity.class);
                 intent.putExtra("nickName",nickName);
