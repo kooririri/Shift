@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -24,13 +25,13 @@ import java.net.URL;
 
 public class LoginActivity extends AppCompatActivity {
 
-    private static final String ACCESS_URL = "http://10.0.2.2/test/index.php";
+    private static final String ACCESS_URL = "http://10.0.2.2/shift_app_backend/controllers/login_controller.php";
     private String userName;
     private String password;
     private String nickName = null;
     EditText etUserName;
     EditText etPassword;
-    private int success_flag = 0;
+    private int status = 0;
 
 
     @Override
@@ -60,8 +61,15 @@ public class LoginActivity extends AppCompatActivity {
     public void loginButtonClick(View view){
         userName = etUserName.getText().toString();
         password = etPassword.getText().toString();
-        LoginThread loginThread = new LoginThread();
-        loginThread.execute(ACCESS_URL,userName,password);
+        if(userName.equals("")){
+            Toast.makeText(getApplicationContext(),"メールアドレスを入力してください",Toast.LENGTH_LONG).show();
+        }else if(password.equals("")){
+            Toast.makeText(getApplicationContext(),"パスワードを入力してください",Toast.LENGTH_LONG).show();
+        }else{
+            LoginThread loginThread = new LoginThread();
+            loginThread.execute(ACCESS_URL,userName,password);
+            Log.e("loginl","clicked"+userName+password);
+        }
     }
 
     private class LoginThread extends AsyncTask<String, Void, String> {
@@ -73,7 +81,7 @@ public class LoginActivity extends AppCompatActivity {
             String strUserName = params[1];
             String strPassword = params[2];
 
-            String postData ="userName="+strUserName+"&password="+strPassword;
+            String postData ="user_name="+strUserName+"&password="+strPassword;
             HttpURLConnection con = null;
             InputStream is = null;
             String result = "";
@@ -81,8 +89,8 @@ public class LoginActivity extends AppCompatActivity {
             try {
                 URL url = new URL(uri);
                 con = (HttpURLConnection) url.openConnection();
-                con.setRequestProperty("Content-Type", "application/json; utf-8"); // 追記
-                con.setRequestProperty("Accept", "application/json");
+//                con.setRequestProperty("Content-Type", "application/json; utf-8"); // 追記
+//                con.setRequestProperty("Accept", "application/json");
                 con.setRequestMethod("POST");
                 con.setConnectTimeout(2000);
                 con.setDoOutput(true);
@@ -122,19 +130,21 @@ public class LoginActivity extends AppCompatActivity {
             String pass = null;
             try {
                 JSONObject object = new JSONObject(result);
-                user = object.getString("username");
+                user = object.getString("email");
                 pass = object.getString("password");
-                nickName = object.getString("nickName");
-                success_flag = object.getInt("successFlag");
+                nickName = object.getString("nickname");
+                status = object.getInt("status");
             } catch (JSONException e) {
                 e.printStackTrace();
             }
             SharedPreferences sp = getSharedPreferences("login", getApplicationContext().MODE_PRIVATE);
             sp.edit().putString("userName",user).putString("password",pass).apply();
-            if(success_flag == 1){
+            if(status == 1){
                 Intent intent = new Intent(getApplicationContext(),MainActivity.class);
                 intent.putExtra("nickName",nickName);
                 startActivity(intent);
+            }else{
+                Toast.makeText(getApplicationContext(),"メールアドレスとパスワードをチェックしてからも一回試し下さい",Toast.LENGTH_LONG).show();
             }
 
         }

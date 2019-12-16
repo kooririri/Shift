@@ -1,5 +1,6 @@
 package local.hal.st31.android.shift.fragment;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -19,10 +20,15 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.google.gson.FieldNamingPolicy;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -64,7 +70,8 @@ public class ShiftSubmitFragment extends Fragment {
 
 
 //    private static final String URL = "http://shift_backend.test/shift";
-    private static final String URL = "http://10.0.2.2/shift_backend/controllers/shift_controller.php";
+    private static final String URLGet = "http://10.0.2.2/shift_app_backend/controllers/shift_controller.php";
+    private static final String URLPost = "http://10.0.2.2/shift_backend/controllers/shift_controller.php";
 //    private static final String URL = "http://10.0.2.2/test/index.php";
 
     @Override
@@ -96,6 +103,7 @@ public class ShiftSubmitFragment extends Fragment {
 
     private void initView(){
         //次の月（シフト）の日数を取得
+        SharedPreferences sp = GlobalUtils.getInstance().mainActivity.getSharedPreferences("login", GlobalUtils.getInstance().context.MODE_PRIVATE);
         ShiftTypeDataReceiver shiftTypeDataReceiver = new ShiftTypeDataReceiver();
         shiftTypeDataReceiver.execute(URL);
         shiftMonthListAdapter = new ShiftMonthListAdapter(getContext());
@@ -143,7 +151,7 @@ public class ShiftSubmitFragment extends Fragment {
 
     private class ShiftTypeDataReceiver extends AsyncTask<String,Void,String> {
 
-        private static final String DEBUG_TAG = "ListReceiver";
+        private static final String DEBUG_TAG = "ShiftTypeDataReceiver";
         @Override
         protected String doInBackground(String... params) {
             String urlStr = params[0];
@@ -325,7 +333,7 @@ public class ShiftSubmitFragment extends Fragment {
         }
         return data;
     }
-    
+
 
     private  List<List<ShiftTypeBean>> getTestData() {
         Calendar calendar = Calendar.getInstance();
