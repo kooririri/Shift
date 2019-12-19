@@ -13,6 +13,7 @@ import android.view.WindowManager;
 import android.widget.TextView;
 
 import local.hal.st31.android.shift.fragment.HomeFragment;
+import local.hal.st31.android.shift.fragment.PersonalSettingFragment;
 import local.hal.st31.android.shift.fragment.ShiftSubmitFragment;
 import local.hal.st31.android.shift.utils.GlobalUtils;
 
@@ -21,6 +22,7 @@ public class MainActivity extends AppCompatActivity {
     private BottomNavigationView bottomNavigationView;
     private HomeFragment homeFragment;
     private ShiftSubmitFragment shiftSubmitFragment;
+    private PersonalSettingFragment personalSettingFragment;
     private Fragment[] fragments;
     private int lastfragment;//用于记录上个选择的Fragment
     @Override
@@ -36,12 +38,14 @@ public class MainActivity extends AppCompatActivity {
         initFragment();
         GlobalUtils.getInstance().setContext(getApplicationContext());
         GlobalUtils.getInstance().mainActivity = this;
+
     }
 
     private void initFragment(){
         homeFragment = new HomeFragment();
         shiftSubmitFragment = new ShiftSubmitFragment();
-        fragments = new Fragment[]{homeFragment,shiftSubmitFragment,homeFragment,shiftSubmitFragment};
+        personalSettingFragment = new PersonalSettingFragment();
+        fragments = new Fragment[]{homeFragment,shiftSubmitFragment,homeFragment,personalSettingFragment};
         lastfragment=0;
         getSupportFragmentManager().beginTransaction().replace(R.id.a,homeFragment).show(homeFragment).commit();
         bottomNavigationView=findViewById(R.id.nav_view);
@@ -81,7 +85,7 @@ public class MainActivity extends AppCompatActivity {
 
                     }
                     return true;
-                case R.id.a:
+                case R.id.navigation_personal_setting:
                     if(lastfragment!=3)
                     {
                         switchFragment(lastfragment,3);

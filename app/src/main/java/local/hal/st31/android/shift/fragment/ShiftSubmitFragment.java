@@ -19,6 +19,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
@@ -102,6 +103,11 @@ public class ShiftSubmitFragment extends Fragment {
 //        Log.e("kkk",getData().toString());
     }
 
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+    }
+
     private void initView(){
         //次の月（シフト）の日数を取得
         SharedPreferences sp = GlobalUtils.getInstance().mainActivity.getSharedPreferences("login", GlobalUtils.getInstance().context.MODE_PRIVATE);
@@ -113,6 +119,7 @@ public class ShiftSubmitFragment extends Fragment {
         } catch (JSONException e) {
             e.printStackTrace();
         }
+        //TODO 下拉菜单传group_id，取回当前group的shift_type
         ShiftTypeDataReceiver shiftTypeDataReceiver = new ShiftTypeDataReceiver();
         shiftTypeDataReceiver.execute(URL);
         shiftMonthListAdapter = new ShiftMonthListAdapter(getContext());
@@ -221,7 +228,6 @@ public class ShiftSubmitFragment extends Fragment {
                 int savedModifyVersion = ps.getInt("modifyVersion",0);
 
                 //同じ場合、変更なし、テーブル更新なし　同じではない場合テーブル更新
-                //TODO　サーバ側shift_typeテーブルフィールド変更した場合、こっちも変更
                 int num = 0;
                 if(shiftId != savedShiftId||modifyVersion != savedModifyVersion){
                     ps.edit().putInt("shiftId",shiftId).putInt("modifyVersion",modifyVersion).apply();
