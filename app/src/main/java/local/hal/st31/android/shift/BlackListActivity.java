@@ -5,6 +5,8 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.TableRow;
@@ -14,6 +16,8 @@ import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
+import com.yanzhenjie.recyclerview.OnItemClickListener;
+import com.yanzhenjie.recyclerview.SwipeRecyclerView;
 
 import org.angmarch.views.NiceSpinner;
 import org.angmarch.views.OnSpinnerItemSelectedListener;
@@ -33,19 +37,24 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import local.hal.st31.android.shift.adapters.GroupMemberAdapter;
+import local.hal.st31.android.shift.beans.BlackListBean;
 import local.hal.st31.android.shift.utils.GlobalUtils;
 
 public class BlackListActivity extends AppCompatActivity {
 
     private static final String GROUP_URL = "http://10.0.2.2/shift_app_backend/controllers/group_controller.php";
 
+    private int userMemberId;
     private List<String> groupNameList;
     private String selectedGroup;
     private List<Integer> groupIdList;
     private int selectedGroupId;
     private List<String> groupMemberList;
     private List<Integer> groupMemberIdList;
-
+    private SwipeRecyclerView swipeRecyclerView;
+    private List<BlackListBean> blackMemberList;
+    GroupMemberAdapter groupMemberAdapter;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,9 +64,9 @@ public class BlackListActivity extends AppCompatActivity {
 
 
         SharedPreferences sp = getSharedPreferences("login", getApplicationContext().MODE_PRIVATE);
-        int userId = sp.getInt("userId",0);
+        userMemberId = sp.getInt("userId",0);
         Map<String,Integer> map = new HashMap<>();
-        map.put("userId",userId);
+        map.put("userId",userMemberId);
         map.put("postNo",1);
         Gson gson = new GsonBuilder()
                 .serializeNulls()
@@ -66,7 +75,6 @@ public class BlackListActivity extends AppCompatActivity {
         String jsonGroupData = gson.toJson(map);
         GroupReceiver groupReceiver = new GroupReceiver();
         groupReceiver.execute(GROUP_URL,jsonGroupData);
-
     }
 
     private void spinnerHandler(){
@@ -92,7 +100,41 @@ public class BlackListActivity extends AppCompatActivity {
         });
     }
 
+    private void swipeRecyclerViewHandler(){
+        swipeRecyclerView = findViewById(R.id.memberRecyclerView);
+        groupMemberAdapter = new GroupMemberAdapter(getApplicationContext());
+        groupMemberAdapter.setData(blackMemberList);
+        GridLayoutManager layoutManager = new GridLayoutManager(getApplicationContext(),4);
+        swipeRecyclerView.setLayoutManager(layoutManager);
+        swipeRecyclerView.setAdapter(groupMemberAdapter);
+        groupMemberAdapter.setListener(new GroupMemberAdapter.onMemberClickListener() {
+            @Override
+            public void onItemClick(int position, BlackListBean blackListBean) {
+                if (blackListBean.getBlackRank() == 0) {
+                    blackListBean.setBlackRank(1);
+                } else {
+                    blackListBean.setBlackRank(0);
 
+                }
+            }
+        });
+    }
+
+    public void sendButtonClick(View view){
+        Map<String,Object> map = new HashMap<>();
+        map.put("list",blackMemberList);
+        map.put("postNo",3);
+        map.put("userId",userMemberId);
+        Gson gson = new GsonBuilder()
+                .serializeNulls()
+                .setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE)
+                .create();
+        String submitJson = gson.toJson(map);
+//        GroupMemberPoster groupMemberPoster = new GroupMemberPoster();
+//        groupMemberPoster.execute(GROUP_URL,submitJson);
+        Log.e("paku",submitJson);
+
+    }
 
     private class GroupReceiver extends AsyncTask<String,Void,String> {
 
@@ -220,6 +262,7 @@ public class BlackListActivity extends AppCompatActivity {
             JSONObject jsonObject = null;
             groupMemberList = new ArrayList<>();
             groupMemberIdList = new ArrayList<>();
+            blackMemberList = new ArrayList<>();
             try {
                 jsonObject = new JSONObject(result);
                 JSONArray jsonArray = jsonObject.getJSONArray("result");
@@ -227,14 +270,75 @@ public class BlackListActivity extends AppCompatActivity {
                     JSONObject data = jsonArray.getJSONObject(i);
                     String memberName = data.getString("nickname");
                     int userId = data.getInt("user_id");
-                    groupMemberList.add(memberName);
-                    groupIdList.add(userId);
+                    if(userId != userMemberId){
+                        BlackListBean blackListBean = new BlackListBean();
+                        blackListBean.setNickName(memberName);
+                        blackListBean.setUserId(userId);
+                        blackMemberList.add(blackListBean);
+                        groupMemberList.add(memberName);
+                        groupIdList.add(userId);
+                    }
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
             }
+            swipeRecyclerViewHandler();
+        }
+    }
 
-            Log.e("paku",groupMemberList.toString());
+
+    private class GroupMemberPoster extends AsyncTask<String,Void,String> {
+
+        private static final String DEBUG_TAG = "GroupMemberPoster";
+        @Override
+        protected String doInBackground(String... params) {
+            String uri = params[0];
+            String jsonData = params[1];
+            HttpURLConnection con = null;
+            InputStream is = null;
+            String result = "";
+
+            try {
+                URL url = new URL(uri);
+                con = (HttpURLConnection) url.openConnection();
+                con.setRequestProperty("Content-Type", "application/json; utf-8"); // 追記
+                con.setRequestProperty("Accept", "application/json");
+                con.setRequestMethod("POST");
+                con.setDoOutput(true);
+                // サーバーへ送るJSONをセットする
+                DataOutputStream wr = new DataOutputStream(con.getOutputStream());
+                wr.writeBytes(jsonData);
+                wr.flush();
+                wr.close();
+
+                con.connect();
+                int status = con.getResponseCode();
+                if(status != 200){
+                    throw new IOException("ステータスコード："+status);
+                }
+                is = con.getInputStream();
+                result = GlobalUtils.getInstance().is2String(is);
+            } catch (MalformedURLException ex) {
+                Log.e(DEBUG_TAG, "URL変換失敗", ex);
+            } catch (IOException ex) {
+                Log.e(DEBUG_TAG, "通信失敗", ex);
+            } finally {
+                if (con != null) {
+                    con.disconnect();
+                }
+                if (is != null) {
+                    try {
+                        is.close();
+                    } catch (IOException ex) {
+                        Log.e(DEBUG_TAG, "InputStream解放失敗", ex);
+                    }
+                }
+            }
+            return result;
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
 
         }
     }

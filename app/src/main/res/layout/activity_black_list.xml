@@ -20,10 +20,17 @@
         android:layout_margin="5dp"
         />
 
+    <com.yanzhenjie.recyclerview.SwipeRecyclerView
+        android:id="@+id/memberRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
 
 
-
-
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="送信"
+        android:onClick="sendButtonClick"/>
 
 
 </LinearLayout>
