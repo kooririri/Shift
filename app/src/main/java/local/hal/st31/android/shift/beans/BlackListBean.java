@@ -1,10 +1,13 @@
 package local.hal.st31.android.shift.beans;
 
 public class BlackListBean {
+    private int id;
+    private int myId;
     private int userId;
     private String nickName;
     private int blackRank;
     private String colorCode;
+    private int groupId;
 
     public BlackListBean(){
         blackRank = 0;
@@ -18,6 +21,22 @@ public class BlackListBean {
                 ", blankRank=" + blackRank +
                 ", colorCode='" + colorCode + '\'' +
                 '}';
+    }
+
+    public int getMyId() {
+        return myId;
+    }
+
+    public void setMyId(int myId) {
+        this.myId = myId;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public int getUserId() {
@@ -50,5 +69,13 @@ public class BlackListBean {
 
     public void setColorCode(String colorCode) {
         this.colorCode = colorCode;
+    }
+
+    public int getGroupId() {
+        return groupId;
+    }
+
+    public void setGroupId(int groupId) {
+        this.groupId = groupId;
     }
 }

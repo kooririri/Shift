@@ -1,5 +1,6 @@
 package local.hal.st31.android.shift.adapters;
 
+
 import android.content.Context;
 import android.graphics.Color;
 import android.support.annotation.NonNull;
@@ -37,7 +38,7 @@ public class GroupMemberAdapter extends SwipeRecyclerView.Adapter<GroupMemberAda
     @NonNull
     @Override
     public GroupMemberAdapter.GroupMemberViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
-        View view = mInflater.inflate(R.layout.grid_group_member_item,viewGroup,false);
+        View view = mInflater.inflate(R.layout.gird_group_member_item,viewGroup,false);
         return new GroupMemberViewHolder(view);
     }
 

@@ -21,6 +21,18 @@
             android:textColor="@android:color/white"
             android:gravity="center_vertical"
             />
+        <org.angmarch.views.NiceSpinner
+            android:id="@+id/groups_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Group"
+            android:gravity="center_vertical"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:background="#fce4ec"
+            android:elevation="5dp"
+            android:layout_margin="5dp"
+            />
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/shiftListView"

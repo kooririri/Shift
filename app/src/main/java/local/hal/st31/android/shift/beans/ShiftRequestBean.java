@@ -2,6 +2,8 @@ package local.hal.st31.android.shift.beans;
 
 import android.support.annotation.NonNull;
 
+import java.util.UUID;
+
 public class ShiftRequestBean {
 
     private String id;//シフト希望ID  id+date+shiftTypeId
@@ -9,6 +11,7 @@ public class ShiftRequestBean {
     private int shiftTypeId;//シフトの番タイプID
     private String date;
     private int selectedFlag;
+
 
     public ShiftRequestBean(){
 
@@ -21,11 +24,11 @@ public class ShiftRequestBean {
     }
 
 
-    public String getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(int id) {
         this.id = id;
     }
 

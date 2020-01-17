@@ -25,6 +25,8 @@ import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import org.angmarch.views.NiceSpinner;
+import org.angmarch.views.OnSpinnerItemSelectedListener;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -42,6 +44,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import local.hal.st31.android.shift.BlackListActivity;
 import local.hal.st31.android.shift.MainActivity;
 import local.hal.st31.android.shift.R;
 import local.hal.st31.android.shift.adapters.ShiftMonthListAdapter;
@@ -72,6 +75,7 @@ public class ShiftSubmitFragment extends Fragment {
 
 
 //    private static final String URL = "http://shift_backend.test/shift";
+    private static final String URLPost0 = "http://10.0.2.2/shift_app_backend/controllers/shift_controller0.php";
     private static final String URLPost1 = "http://10.0.2.2/shift_app_backend/controllers/shift_controller1.php";
     private static final String URLPost2= "http://10.0.2.2/shift_app_backend/controllers/shift_controller2.php";
 //    private static final String URL = "http://10.0.2.2/test/index.php";
@@ -79,6 +83,7 @@ public class ShiftSubmitFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
     }
 
     @Nullable
@@ -108,35 +113,46 @@ public class ShiftSubmitFragment extends Fragment {
         super.onAttach(context);
     }
 
+    private void spinnerHandler(){
+        NiceSpinner niceSpinner = fragmentView.findViewById(R.id.groups_spinner);
+        niceSpinner.attachDataSource(groupNameList);
+        niceSpinner.setOnSpinnerItemSelectedListener(new OnSpinnerItemSelectedListener() {
+            @Override
+            public void onItemSelected(NiceSpinner parent, View view, int position, long id) {
+                selectedGroup = parent.getItemAtPosition(position).toString();
+                selectedGroupId = groupIdList.get(position);
+                Map<String,Integer> map = new HashMap<>();
+                map.put("groupId",selectedGroupId);
+                Gson gson = new GsonBuilder()
+                        .serializeNulls()
+                        .setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE)
+                        .create();
+                String jsonData = gson.toJson(map);
+                ShiftTypeDataReceiver shiftTypeDataReceiver = new ShiftTypeDataReceiver();
+                shiftTypeDataReceiver.execute(URLPost1,jsonData);
+            }
+        });
+    }
+
     private void initView(){
         //次の月（シフト）の日数を取得
         SharedPreferences sp = GlobalUtils.getInstance().mainActivity.getSharedPreferences("login", GlobalUtils.getInstance().context.MODE_PRIVATE);
         savedId= sp.getInt("userId",0);
-        Log.e("oko","idは"+savedId);
         JSONObject userIdObject = new JSONObject();
         try {
             userIdObject.put("user_id",savedId);
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        //TODO 下拉菜单传group_id，取回当前group的shift_type
-        ShiftTypeDataReceiver shiftTypeDataReceiver = new ShiftTypeDataReceiver();
-        shiftTypeDataReceiver.execute(URL);
-        shiftMonthListAdapter = new ShiftMonthListAdapter(getContext());
-        dataList = getData();
-        shiftMonthListAdapter.setList(dataList);
-        shiftMonthListAdapter.notifyDataSetChanged();
-        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
-        layoutManager.setOrientation(LinearLayoutManager.VERTICAL);//縦並び
-        shiftListView.setLayoutManager(layoutManager);
-        shiftListView.setAdapter(shiftMonthListAdapter);
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(new Date());
-        cal.add(Calendar.MONTH, 1);
-        dateLabel = fragmentView.findViewById(R.id.day_text);
-        dateLabel.setText(cal.get(Calendar.YEAR)+"年"+(cal.get(Calendar.MONTH)+1)+"月");
-        shiftRequestSubmitButton = fragmentView.findViewById(R.id.btnSubmit);
-        shiftRequestSubmitButton.setOnClickListener(new View.OnClickListener() {
+        GroupIdReceiver groupIdReceiver = new GroupIdReceiver();
+        groupIdReceiver.execute(URLPost0,userIdObject.toString());
+        Log.e("ppxx",userIdObject.toString());
+
+//        ShiftTypeDataReceiver shiftTypeDataReceiver = new ShiftTypeDataReceiver();
+//        shiftTypeDataReceiver.execute(URLPost1,userIdObject.toString());
+
+        submitButton = fragmentView.findViewById(R.id.btn_submit);
+        submitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 for(int i=0;i<dataList.size();i++){
@@ -162,6 +178,77 @@ public class ShiftSubmitFragment extends Fragment {
                 Log.e("debugb",test.toString());
             }
         });
+    }
+
+    private class GroupIdReceiver extends AsyncTask<String,Void,String>{
+
+        private static final String DEBUG_TAG = "groupIdReceiver";
+        @Override
+        protected String doInBackground(String... params) {
+            String uri = params[0];
+            String jsonData = params[1];
+            HttpURLConnection con = null;
+            InputStream is = null;
+            String result = "";
+
+            try {
+                URL url = new URL(uri);
+                con = (HttpURLConnection) url.openConnection();
+                con.setRequestProperty("Content-Type", "application/json; utf-8"); // 追記
+                con.setRequestProperty("Accept", "application/json");
+                con.setRequestMethod("POST");
+                con.setDoOutput(true);
+                // サーバーへ送るJSONをセットする
+                DataOutputStream wr = new DataOutputStream(con.getOutputStream());
+                wr.writeBytes(jsonData);
+                wr.flush();
+                wr.close();
+
+                con.connect();
+                int status = con.getResponseCode();
+                if(status != 200){
+                    throw new IOException("ステータスコード："+status);
+                }
+                is = con.getInputStream();
+                result = GlobalUtils.getInstance().is2String(is);
+            } catch (MalformedURLException ex) {
+                Log.e(DEBUG_TAG, "URL変換失敗", ex);
+            } catch (IOException ex) {
+                Log.e(DEBUG_TAG, "通信失敗", ex);
+            } finally {
+                if (con != null) {
+                    con.disconnect();
+                }
+                if (is != null) {
+                    try {
+                        is.close();
+                    } catch (IOException ex) {
+                        Log.e(DEBUG_TAG, "InputStream解放失敗", ex);
+                    }
+                }
+            }
+            return result;
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            String status = "";
+
+            try {
+                JSONObject jsonObject = new JSONObject(result);
+                JSONArray jsonArray = jsonObject.getJSONArray("list");
+                for(int i = 0 ; i < jsonArray.length() ; i++){
+                    JSONObject data = jsonArray.getJSONObject(i);
+                    String groupName = data.getString("name");
+                    int groupId = data.getInt("group_id");
+                    groupNameList.add(groupName);
+                    groupIdList.add(groupId);
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            spinnerHandler();
+        }
     }
 
 
@@ -231,7 +318,6 @@ public class ShiftSubmitFragment extends Fragment {
                 int num = 0;
                 if(shiftId != savedShiftId||modifyVersion != savedModifyVersion){
                     ps.edit().putInt("shiftId",shiftId).putInt("modifyVersion",modifyVersion).apply();
-                    DataAccess.deleteAllShiftType(db);
                     //既存table删除？？？？？
                     for(int num2 = 0;num2<jsonArray.length();num2++){
                         JSONObject dataObject = jsonArray.getJSONObject(num2);
@@ -273,41 +359,6 @@ public class ShiftSubmitFragment extends Fragment {
         }
     }
 
-//    private  List<List<ShiftTypeBean>> getData(){
-//        db = _helper.getWritableDatabase();
-//        SharedPreferences ps = PreferenceManager.getDefaultSharedPreferences(getContext());
-//        int shiftId = ps.getInt("shiftId",0);
-//        Log.e("asdd",shiftId+"");
-//        List<List<ShiftTypeBean>> data = new ArrayList<>();
-//
-//        Calendar calendar = Calendar.getInstance();
-//        calendar.add(Calendar.MONTH,+1);
-//        int year = calendar.get(Calendar.YEAR);
-//        int month = calendar.get(Calendar.MONTH)+1;
-//        int days = DateUtils.getDaysByYearMonth(year,month);
-//        List<ShiftTypeBean> list;
-//        list = DataAccess.getAllShiftTypeByShiftId(db,shiftId);
-//        int num = DataAccess.getShiftTypeNum(db,shiftId);
-//        Log.e("asdd",num+"");
-//        for(int i = 1;i<=days;i++){
-//            List<ShiftTypeBean> a =new ArrayList<>();
-//
-//            for(int j = 1 ;j<=num;j++){
-//                ShiftTypeBean bean = new ShiftTypeBean();
-//                ShiftTypeBean test = DataAccess.getOneShiftTypeBean(db,j);
-//                bean.setTypeName(test.getTypeName());
-//                bean.setComment(test.getComment());
-//                bean.setEndTime(test.getEndTime());
-//                bean.setBeginTime(test.getBeginTime());
-//                bean.setShiftTypeId(test.getShiftTypeId());
-//                bean.setShiftId(test.getShiftId());
-//                a.add(bean);
-//            }
-//            data.add(a);
-//        }
-//
-//        return data;
-//    }
 
     private  List<List<ShiftTypeBean>> getData(){
         db = _helper.getWritableDatabase();
@@ -316,8 +367,9 @@ public class ShiftSubmitFragment extends Fragment {
         List<List<ShiftTypeBean>> data = new ArrayList<>();
         int num = DataAccess.getShiftTypeNum(db,shiftId);
         List<Map<String,Object>> sourceData = DataAccess.getShiftRequestByShiftId(db,shiftId);
+
         List<ShiftTypeBean> list = new ArrayList<>();
-        LogUtil.e("ddppp", "------"+sourceData.toString());
+
         for (int i = 0 ; i < sourceData.size() ; i ++){
             if(i % num == 0 ){
                 list = new ArrayList<>();
@@ -347,65 +399,66 @@ public class ShiftSubmitFragment extends Fragment {
                 data.add(list);
             }
         }
+        LogUtil.e("ddppp", "------"+data);
         return data;
     }
 
 
-    private  List<List<ShiftTypeBean>> getTestData() {
-        Calendar calendar = Calendar.getInstance();
-        int year = calendar.get(Calendar.YEAR);
-        int month = calendar.get(Calendar.MONTH)+2;
-        int days = DateUtils.getDaysByYearMonth(year,month);
-
-        List<List<ShiftTypeBean>> data = new ArrayList<>();
-
-        for(int i = 1;i<=days;i++){
-            List<ShiftTypeBean> list = new ArrayList<>();
-            ShiftTypeBean bean = new ShiftTypeBean();
-            bean.setShiftId(1);
-            bean.setShiftTypeId(1);
-            bean.setBeginTime("10:00");
-            bean.setEndTime("19:00");
-            bean.setTypeName("A勤");
-            bean.setComment("休憩1時間");
-            list.add(bean);
-            bean = new ShiftTypeBean();
-            bean.setShiftId(2);
-            bean.setShiftTypeId(2);
-            bean.setBeginTime("12:00");
-            bean.setEndTime("21:00");
-            bean.setTypeName("B勤");
-            bean.setComment("休憩1時間");
-            list.add(bean);
-            bean = new ShiftTypeBean();
-            bean.setShiftId(3);
-            bean.setShiftTypeId(3);
-            bean.setBeginTime("12:00");
-            bean.setEndTime("21:00");
-            bean.setTypeName("C勤");
-            bean.setComment("休憩1時間");
-            list.add(bean);
-//            bean = new ShiftTypeBean();
-//            bean.setShiftId(4);
-//            bean.setShiftTypeId(4);
-//            bean.setBeginTime("12:00");
-//            bean.setEndTime("21:00");
-//            bean.setTypeName("D勤");
+//    private  List<List<ShiftTypeBean>> getTestData() {
+//        Calendar calendar = Calendar.getInstance();
+//        int year = calendar.get(Calendar.YEAR);
+//        int month = calendar.get(Calendar.MONTH)+2;
+//        int days = DateUtils.getDaysByYearMonth(year,month);
+//
+//        List<List<ShiftTypeBean>> data = new ArrayList<>();
+//
+//        for(int i = 1;i<=days;i++){
+//            List<ShiftTypeBean> list = new ArrayList<>();
+//            ShiftTypeBean bean = new ShiftTypeBean();
+//            bean.setShiftId(1);
+//            bean.setShiftTypeId(1);
+//            bean.setBeginTime("10:00");
+//            bean.setEndTime("19:00");
+//            bean.setTypeName("A勤");
 //            bean.setComment("休憩1時間");
 //            list.add(bean);
 //            bean = new ShiftTypeBean();
-//            bean.setShiftId(5);
-//            bean.setShiftTypeId(5);
+//            bean.setShiftId(2);
+//            bean.setShiftTypeId(2);
 //            bean.setBeginTime("12:00");
 //            bean.setEndTime("21:00");
-//            bean.setTypeName("E勤");
+//            bean.setTypeName("B勤");
 //            bean.setComment("休憩1時間");
 //            list.add(bean);
-
-            data.add(list);
-        }
-
-        return data;
-    }
+//            bean = new ShiftTypeBean();
+//            bean.setShiftId(3);
+//            bean.setShiftTypeId(3);
+//            bean.setBeginTime("12:00");
+//            bean.setEndTime("21:00");
+//            bean.setTypeName("C勤");
+//            bean.setComment("休憩1時間");
+//            list.add(bean);
+////            bean = new ShiftTypeBean();
+////            bean.setShiftId(4);
+////            bean.setShiftTypeId(4);
+////            bean.setBeginTime("12:00");
+////            bean.setEndTime("21:00");
+////            bean.setTypeName("D勤");
+////            bean.setComment("休憩1時間");
+////            list.add(bean);
+////            bean = new ShiftTypeBean();
+////            bean.setShiftId(5);
+////            bean.setShiftTypeId(5);
+////            bean.setBeginTime("12:00");
+////            bean.setEndTime("21:00");
+////            bean.setTypeName("E勤");
+////            bean.setComment("休憩1時間");
+////            list.add(bean);
+//
+//            data.add(list);
+//        }
+//
+//        return data;
+//    }
 
 }

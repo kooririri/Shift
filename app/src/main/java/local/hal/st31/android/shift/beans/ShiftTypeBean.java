@@ -13,6 +13,7 @@ public class ShiftTypeBean {
     private int shiftRequestId;
     private String date;
 
+
     public ShiftTypeBean(){
 
     }

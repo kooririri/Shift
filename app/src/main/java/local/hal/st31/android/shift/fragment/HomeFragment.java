@@ -112,7 +112,7 @@ public class HomeFragment extends Fragment {
         selfScheduleAdapter = new SelfScheduleAdapter(getContext());
         selfScheduleAdapter.setData(data);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
-        layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+        layoutManager.setOrientation(LinearLayoutManager.VERTICAL);//横並び
         selfScheduleRecyclerView.setLayoutManager(layoutManager);
 
         selfScheduleRecyclerView.setAdapter(selfScheduleAdapter);

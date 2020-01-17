@@ -18,6 +18,11 @@ import local.hal.st31.android.shift.fragment.ShiftSubmitFragment;
 import local.hal.st31.android.shift.utils.GlobalUtils;
 
 public class MainActivity extends AppCompatActivity {
+    //ALTER TABLE `tbname`
+    //  DROP PRIMARY KEY,
+    //   ADD PRIMARY KEY(
+    //     `id`,
+    //     `username`);
     private TextView mTextMessage;
     private BottomNavigationView bottomNavigationView;
     private HomeFragment homeFragment;
