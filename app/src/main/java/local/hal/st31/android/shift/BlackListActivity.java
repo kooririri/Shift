@@ -18,6 +18,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.yanzhenjie.recyclerview.OnItemClickListener;
+import com.yanzhenjie.recyclerview.OnItemLongClickListener;
 import com.yanzhenjie.recyclerview.SwipeRecyclerView;
 
 import org.angmarch.views.NiceSpinner;
@@ -128,11 +129,6 @@ public class BlackListActivity extends AppCompatActivity {
     }
 
     public void sendButtonClick(View view){
-//        Map<String,Object> map = new HashMap<>();
-//        map.put("list",blackMemberList);
-//        map.put("postNo",3);
-//        map.put("userId",userMemberId);
-//        map.put("groupId",selectedGroupId);
         Gson gson = new GsonBuilder()
                 .serializeNulls()
                 .setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE)

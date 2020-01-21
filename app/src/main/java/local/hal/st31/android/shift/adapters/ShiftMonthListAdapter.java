@@ -1,5 +1,6 @@
 package local.hal.st31.android.shift.adapters;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Color;
 import android.support.annotation.NonNull;
@@ -14,6 +15,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -26,6 +30,7 @@ import local.hal.st31.android.shift.R;
 import local.hal.st31.android.shift.beans.ShiftTypeBean;
 import local.hal.st31.android.shift.beans.TempBean;
 import local.hal.st31.android.shift.utils.DateUtils;
+import local.hal.st31.android.shift.utils.GlobalUtils;
 
 public class ShiftMonthListAdapter extends RecyclerView.Adapter<ShiftMonthListAdapter.ShiftMonthListViewHolder> {
 
@@ -59,11 +64,33 @@ public class ShiftMonthListAdapter extends RecyclerView.Adapter<ShiftMonthListAd
         return new ShiftMonthListViewHolder(view);
     }
 
+    @SuppressLint("ResourceAsColor")
     @Override
     public void onBindViewHolder(@NonNull ShiftMonthListViewHolder shiftMonthListViewHolder, int position) {
 //        TempBean tempBean = list.get(position);
         List<ShiftTypeBean> data = list.get(position);
         shiftMonthListViewHolder.textView.setText((position+1) + "日");
+
+        Map<String, JSONArray> kaburuMap = GlobalUtils.getInstance().kaburuMap;
+        JSONArray jsonArray = kaburuMap.get("2");
+        Log.e("ppqq",jsonArray.length()+"");
+        String tempPositon = String.valueOf(position);
+        if(position <10){
+            tempPositon = "0" + position;
+        }
+        for (int i =0;i<jsonArray.length();i++){
+            try {
+                String day = jsonArray.getString(i);
+                if(tempPositon.equals(day.substring(8))){
+                    shiftMonthListViewHolder.textView.setBackgroundColor(R.color.sblue);
+                }
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+
+//        shiftMonthListViewHolder.textView.setBackgroundColor(R.color.sblue);
         ShiftOptionAdapter shiftOptionAdapter = new ShiftOptionAdapter(viewGroup.getContext());
         shiftOptionAdapter.setShiftList(data);
         shiftOptionAdapter.notifyDataSetChanged();

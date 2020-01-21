@@ -74,10 +74,12 @@ public class ShiftOptionAdapter extends RecyclerView.Adapter<ShiftOptionAdapter.
 
         });
 
-        if (res.getSelectedFlag() == 1) {
-            shiftOptionViewHolder.itemView.setBackgroundColor(Color.BLUE);
-        }else{
+        if (res.getSelectedFlag() == 0) {
             shiftOptionViewHolder.itemView.setBackgroundColor(Color.WHITE);
+        }else if(res.getSelectedFlag() == 1){
+            shiftOptionViewHolder.itemView.setBackgroundColor(Color.BLUE);
+        }else if(res.getSelectedFlag() == 9){
+            shiftOptionViewHolder.itemView.setBackgroundColor(Color.GREEN);
         }
     }
 

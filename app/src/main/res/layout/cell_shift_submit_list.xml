@@ -14,7 +14,7 @@
         <TextView
             android:id="@+id/txDate"
             android:padding="10dp"
-            android:layout_width="50dp"
+            android:layout_width="60dp"
             android:layout_height="match_parent"
             android:text="1日"
             android:layout_centerVertical="true"

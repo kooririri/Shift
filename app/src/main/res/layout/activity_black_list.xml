@@ -20,7 +20,7 @@
         android:layout_margin="5dp"
         />
 
-    <com.yanzhenjie.recyclerview.SwipeRecyclerView
+    <android.support.v7.widget.RecyclerView
         android:id="@+id/memberRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>

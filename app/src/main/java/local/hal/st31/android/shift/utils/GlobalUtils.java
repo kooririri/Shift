@@ -2,10 +2,14 @@ package local.hal.st31.android.shift.utils;
 
 import android.content.Context;
 
+import org.json.JSONArray;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.HashMap;
+import java.util.Map;
 
 import local.hal.st31.android.shift.MainActivity;
 import local.hal.st31.android.shift.fragment.HomeFragment;
@@ -16,6 +20,15 @@ public class GlobalUtils {
     public Context context;
     public MainActivity mainActivity;
     public HomeFragment homeFragment;
+    public Map<String, JSONArray> kaburuMap;
+
+    public Map<String, JSONArray> getKaburuMap() {
+        return kaburuMap;
+    }
+
+    public void setKaburuMap(Map<String, JSONArray> kaburuMap) {
+        this.kaburuMap = kaburuMap;
+    }
 
     public static GlobalUtils getInstance() {
         if(instance == null){
