@@ -23,14 +23,22 @@
     <android.support.v7.widget.RecyclerView
         android:id="@+id/memberRecyclerView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="300dp"/>
 
+    <com.larswerkman.holocolorpicker.ColorPicker
+        android:id="@+id/picker"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_gravity="center"/>
 
     <Button
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="50dp"
         android:text="送信"
         android:onClick="sendButtonClick"/>
+
+
+
 
 
 </LinearLayout>

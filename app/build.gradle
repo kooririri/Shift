@@ -43,6 +43,7 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.8.6'
     //niceSpinner
     implementation 'com.github.arcadefire:nice-spinner:1.4.4'
-
+    //colorPicker
+    implementation 'com.larswerkman:HoloColorPicker:1.5'
 
 }

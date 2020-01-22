@@ -4,42 +4,26 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
-import android.graphics.Color;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.StaggeredGridLayoutManager;
-import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
-import org.json.JSONArray;
-import org.json.JSONException;
+import android.widget.Toast;
 
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import local.hal.st31.android.shift.R;
-
 import local.hal.st31.android.shift.beans.ShiftTypeBean;
-import local.hal.st31.android.shift.beans.TempBean;
 import local.hal.st31.android.shift.db.DataAccess;
 import local.hal.st31.android.shift.db.DatabaseHelper;
-import local.hal.st31.android.shift.utils.DateUtils;
 import local.hal.st31.android.shift.utils.GlobalUtils;
 
-public class ShiftMonthListAdapter extends RecyclerView.Adapter<ShiftMonthListAdapter.ShiftMonthListViewHolder> {
-
-//    private List<TempBean> list;
+public class ShiftMonthListAdapter2 extends RecyclerView.Adapter<ShiftMonthListAdapter2.ShiftMonthListViewHolder>  {
     private  List<List<ShiftTypeBean>> list;
     private LayoutInflater mInflater;
     private ViewGroup viewGroup;
@@ -58,7 +42,7 @@ public class ShiftMonthListAdapter extends RecyclerView.Adapter<ShiftMonthListAd
         }
     }
 
-    public ShiftMonthListAdapter(Context context) {
+    public ShiftMonthListAdapter2(Context context) {
         mInflater = LayoutInflater.from(context);
 
     }
@@ -66,17 +50,17 @@ public class ShiftMonthListAdapter extends RecyclerView.Adapter<ShiftMonthListAd
 
     @NonNull
     @Override
-    public ShiftMonthListViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
+    public ShiftMonthListAdapter2.ShiftMonthListViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
         this.viewGroup = viewGroup;
         View view = mInflater.inflate(R.layout.cell_shift_submit_list, viewGroup, false);
         _helper = new DatabaseHelper(GlobalUtils.getInstance().context);
         db = _helper.getWritableDatabase();
-        return new ShiftMonthListViewHolder(view);
+        return new ShiftMonthListAdapter2.ShiftMonthListViewHolder(view);
     }
 
     @SuppressLint("ResourceAsColor")
     @Override
-    public void onBindViewHolder(@NonNull ShiftMonthListViewHolder shiftMonthListViewHolder, int position) {
+    public void onBindViewHolder(@NonNull ShiftMonthListAdapter2.ShiftMonthListViewHolder shiftMonthListViewHolder, int position) {
 //        TempBean tempBean = list.get(position);
         SharedPreferences ps = PreferenceManager.getDefaultSharedPreferences(GlobalUtils.getInstance().context);
         int groupId = ps.getInt("groupId",0);
@@ -114,24 +98,26 @@ public class ShiftMonthListAdapter extends RecyclerView.Adapter<ShiftMonthListAd
 //        }
 
 //        shiftMonthListViewHolder.textView.setBackgroundColor(R.color.sblue);
-        ShiftOptionAdapter shiftOptionAdapter = new ShiftOptionAdapter(viewGroup.getContext());
-        shiftOptionAdapter.setShiftList(data);
-        shiftOptionAdapter.notifyDataSetChanged();
+        ShiftOptionAdapter2 shiftOptionAdapter2 = new ShiftOptionAdapter2(viewGroup.getContext());
+        shiftOptionAdapter2.setShiftList(data);
+        shiftOptionAdapter2.notifyDataSetChanged();
         LinearLayoutManager layoutManager = new LinearLayoutManager(viewGroup.getContext());
         layoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);//横並び
         shiftMonthListViewHolder.recyclerView.setLayoutManager(layoutManager);
-        shiftMonthListViewHolder.recyclerView.setAdapter(shiftOptionAdapter);
+        shiftMonthListViewHolder.recyclerView.setAdapter(shiftOptionAdapter2);
 //        shiftOptionAdapter.notifyDataSetChanged();
 //        shiftHopeList = new ArrayList<>();
-        shiftOptionAdapter.setListener(new ShiftOptionAdapter.onShiftTypeClickListener() {
+        shiftOptionAdapter2.setListener(new ShiftOptionAdapter2.onShiftTypeClickListener() {
             @Override
             public void onItemClick(int i, ShiftTypeBean res) {
-
-                if (res.getSelectedFlag() == 0) {
-                    res.setSelectedFlag(1);
-                } else {
-                    res.setSelectedFlag(0);
-
+                if(res.getKaburuFlag() == 1){
+                    if (res.getSelectedFlag() == 0) {
+                        res.setSelectedFlag(8);
+                    } else {
+                        res.setSelectedFlag(0);
+                    }
+                }else{
+                    Toast.makeText(GlobalUtils.getInstance().context,"被ってる日しか変更できない。",Toast.LENGTH_SHORT).show();
                 }
             }
         });

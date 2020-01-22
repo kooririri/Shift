@@ -11,21 +11,15 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import local.hal.st31.android.shift.R;
 import local.hal.st31.android.shift.beans.ShiftTypeBean;
 
-public class ShiftOptionAdapter extends RecyclerView.Adapter<ShiftOptionAdapter.ShiftOptionViewHolder> {
-
+public class ShiftOptionAdapter2 extends RecyclerView.Adapter<ShiftOptionAdapter2.ShiftOptionViewHolder>{
     private LayoutInflater mInflater;
     private List<ShiftTypeBean> shiftList;
-    private onShiftTypeClickListener listener;
+    private ShiftOptionAdapter2.onShiftTypeClickListener listener;
 
     static class ShiftOptionViewHolder extends RecyclerView.ViewHolder{
         LinearLayout shiftBlock;
@@ -45,7 +39,7 @@ public class ShiftOptionAdapter extends RecyclerView.Adapter<ShiftOptionAdapter.
 
 
 
-    public ShiftOptionAdapter(Context context){
+    public ShiftOptionAdapter2(Context context){
         mInflater = LayoutInflater.from(context);
     }
     public void setShiftList(List<ShiftTypeBean> shiftList){
@@ -54,21 +48,18 @@ public class ShiftOptionAdapter extends RecyclerView.Adapter<ShiftOptionAdapter.
 
     @NonNull
     @Override
-    public ShiftOptionViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
+    public ShiftOptionAdapter2.ShiftOptionViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
         View view = mInflater.inflate(R.layout.grid_shift_option,viewGroup,false);
-        return new ShiftOptionViewHolder(view);
+        return new ShiftOptionAdapter2.ShiftOptionViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ShiftOptionViewHolder shiftOptionViewHolder, final int position) {
+    public void onBindViewHolder(@NonNull ShiftOptionAdapter2.ShiftOptionViewHolder shiftOptionViewHolder, final int position) {
         final ShiftTypeBean res = shiftList.get(position);
         shiftOptionViewHolder.optionBlock.setText(res.getTypeName());
         shiftOptionViewHolder.startTime.setText(res.getBeginTime().substring(0,5));
         shiftOptionViewHolder.endTime.setText(res.getEndTime().substring(0,5));
         Log.e("kaburuka",res.toString());
-        if (res.getKaburuFlag() == 1 && res.getSelectedFlag() == 8){
-            shiftOptionViewHolder.isKaburu.setText("被ってる");
-        }
 
         shiftOptionViewHolder.itemView.setOnClickListener(new View.OnClickListener(){
 
@@ -82,9 +73,16 @@ public class ShiftOptionAdapter extends RecyclerView.Adapter<ShiftOptionAdapter.
 
         if (res.getSelectedFlag() == 0) {
             shiftOptionViewHolder.itemView.setBackgroundColor(Color.WHITE);
-        }else if(res.getSelectedFlag() == 1 ||res.getSelectedFlag() == 9){
-            shiftOptionViewHolder.itemView.setBackgroundColor(Color.BLUE);
         }
+        if (res.getSelectedFlag() == 8){
+            shiftOptionViewHolder.itemView.setBackgroundColor(Color.BLUE);
+            if (res.getKaburuFlag() == 1){
+                shiftOptionViewHolder.isKaburu.setText("被ってる");
+                shiftOptionViewHolder.isKaburu.setBackgroundColor(Color.RED);
+                shiftOptionViewHolder.isKaburu.setTextColor(Color.WHITE);
+            }
+        }
+
     }
 
 
@@ -97,13 +95,12 @@ public class ShiftOptionAdapter extends RecyclerView.Adapter<ShiftOptionAdapter.
         void onItemClick(int position,ShiftTypeBean shiftTypeBean);
     }
 
-    public onShiftTypeClickListener getListener() {
+    public ShiftOptionAdapter2.onShiftTypeClickListener getListener() {
         return listener;
     }
 
-    public void setListener(onShiftTypeClickListener listener) {
+    public void setListener(ShiftOptionAdapter2.onShiftTypeClickListener listener) {
         this.listener = listener;
     }
 
 }
-

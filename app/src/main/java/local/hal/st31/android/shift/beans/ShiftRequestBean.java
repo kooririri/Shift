@@ -11,6 +11,7 @@ public class ShiftRequestBean {
     private int shiftTypeId;//シフトの番タイプID
     private String date;
     private int selectedFlag;
+    private int kaburuFlag;
 
 
     public ShiftRequestBean(){
@@ -62,5 +63,13 @@ public class ShiftRequestBean {
 
     public void setSelectedFlag(int selectedFlag) {
         this.selectedFlag = selectedFlag;
+    }
+
+    public int getKaburuFlag() {
+        return kaburuFlag;
+    }
+
+    public void setKaburuFlag(int kaburuFlag) {
+        this.kaburuFlag = kaburuFlag;
     }
 }

@@ -6,7 +6,7 @@ public class BlackListBean {
     private int userId;
     private String nickName;
     private int blackRank;
-    private String colorCode;
+    private int colorCode;
     private int groupId;
 
     public BlackListBean(){
@@ -63,11 +63,11 @@ public class BlackListBean {
         this.blackRank = blackRank;
     }
 
-    public String getColorCode() {
+    public int getColorCode() {
         return colorCode;
     }
 
-    public void setColorCode(String colorCode) {
+    public void setColorCode(int colorCode) {
         this.colorCode = colorCode;
     }
 

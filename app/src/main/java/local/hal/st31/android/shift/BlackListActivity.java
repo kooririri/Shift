@@ -3,20 +3,25 @@ package local.hal.st31.android.shift;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
+import android.widget.RatingBar;
 import android.widget.TableRow;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
+import com.larswerkman.holocolorpicker.ColorPicker;
 import com.yanzhenjie.recyclerview.OnItemClickListener;
 import com.yanzhenjie.recyclerview.OnItemLongClickListener;
 import com.yanzhenjie.recyclerview.SwipeRecyclerView;
@@ -42,6 +47,8 @@ import java.util.Map;
 
 import local.hal.st31.android.shift.adapters.GroupMemberAdapter;
 import local.hal.st31.android.shift.beans.BlackListBean;
+import local.hal.st31.android.shift.db.DataAccess;
+import local.hal.st31.android.shift.db.DatabaseHelper;
 import local.hal.st31.android.shift.utils.GlobalUtils;
 
 public class BlackListActivity extends AppCompatActivity {
@@ -56,9 +63,13 @@ public class BlackListActivity extends AppCompatActivity {
     private int selectedGroupId;
     private List<String> groupMemberList;
     private List<Integer> groupMemberIdList;
-    private SwipeRecyclerView swipeRecyclerView;
+    private RecyclerView recyclerView;
     private List<BlackListBean> blackMemberList;
     GroupMemberAdapter groupMemberAdapter;
+    private ColorPicker picker;
+    private DatabaseHelper _helper;
+    private SQLiteDatabase db;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -67,6 +78,10 @@ public class BlackListActivity extends AppCompatActivity {
         groupNameList.add("--------");
         groupIdList = new ArrayList<>();
         groupIdList.add(0);
+        picker = findViewById(R.id.picker);
+        picker.setOldCenterColor(picker.getColor());
+        _helper = new DatabaseHelper(getApplicationContext());
+        db = _helper.getWritableDatabase();
 
 
         SharedPreferences sp = getSharedPreferences("login", getApplicationContext().MODE_PRIVATE);
@@ -103,29 +118,41 @@ public class BlackListActivity extends AppCompatActivity {
                 String jsonMemberData = gson.toJson(map);
                 GroupMemberReceiver groupMemberReceiver = new GroupMemberReceiver();
                 groupMemberReceiver.execute(GROUP_URL,jsonMemberData);
-                Log.e("soso",jsonMemberData);
             }
         });
     }
 
     private void swipeRecyclerViewHandler(){
-        swipeRecyclerView = findViewById(R.id.memberRecyclerView);
+        recyclerView = findViewById(R.id.memberRecyclerView);
         groupMemberAdapter = new GroupMemberAdapter(getApplicationContext());
-        groupMemberAdapter.setData(blackMemberList);
-        GridLayoutManager layoutManager = new GridLayoutManager(getApplicationContext(),4);
-        swipeRecyclerView.setLayoutManager(layoutManager);
-        swipeRecyclerView.setAdapter(groupMemberAdapter);
         groupMemberAdapter.setListener(new GroupMemberAdapter.onMemberClickListener() {
             @Override
-            public void onItemClick(int position, BlackListBean blackListBean) {
+            public void onItemClick(int position, final BlackListBean blackListBean) {
                 if (blackListBean.getBlackRank() == 0) {
                     blackListBean.setBlackRank(1);
+                    picker.setOnColorChangedListener(new ColorPicker.OnColorChangedListener() {
+                        @Override
+                        public void onColorChanged(int color) {
+                            blackListBean.setColorCode(color);
+                            swipeRecyclerViewHandler();
+                        }
+                    });
                 } else {
                     blackListBean.setBlackRank(0);
 
                 }
+
             }
         });
+        groupMemberAdapter.setData(blackMemberList);
+        groupMemberAdapter.notifyDataSetChanged();
+//        LinearLayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
+//        layoutManager.setOrientation(LinearLayoutManager.VERTICAL);//縦並び
+        GridLayoutManager layoutManager = new GridLayoutManager(getApplicationContext(),4);
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setAdapter(groupMemberAdapter);
+
+
     }
 
     public void sendButtonClick(View view){
@@ -136,8 +163,10 @@ public class BlackListActivity extends AppCompatActivity {
         String submitJson = gson.toJson(blackMemberList);
         GroupMemberPoster groupMemberPoster = new GroupMemberPoster();
         groupMemberPoster.execute(BLACK_URL,submitJson);
-        Log.e("paku",submitJson);
-
+        db = _helper.getWritableDatabase();
+        for(int i = 0;i < blackMemberList.size(); i++){
+            DataAccess.blackListReplace(db,blackMemberList.get(i));
+        }
     }
 
     private class GroupReceiver extends AsyncTask<String,Void,String> {
@@ -264,6 +293,7 @@ public class BlackListActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(String result) {
             JSONObject jsonObject = null;
+
             groupMemberList = new ArrayList<>();
             groupMemberIdList = new ArrayList<>();
             blackMemberList = new ArrayList<>();
@@ -275,6 +305,7 @@ public class BlackListActivity extends AppCompatActivity {
                     String memberName = data.getString("nickname");
                     int userId = data.getInt("group_member_id");
                     int blackRank = data.getInt("black_rank");
+                    int colorCode = data.getInt("color_code");
                         BlackListBean blackListBean = new BlackListBean();
                         blackListBean.setNickName(memberName);
                         blackListBean.setUserId(userId);
@@ -282,6 +313,7 @@ public class BlackListActivity extends AppCompatActivity {
                         blackListBean.setBlackRank(blackRank);
                         blackListBean.setMyId(userMemberId);
                         blackListBean.setGroupId(selectedGroupId);
+                        blackListBean.setColorCode(colorCode);
                         blackMemberList.add(blackListBean);
                         groupMemberList.add(memberName);
                         groupIdList.add(userId);

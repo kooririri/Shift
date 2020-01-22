@@ -12,6 +12,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import local.hal.st31.android.shift.beans.BlackListBean;
 import local.hal.st31.android.shift.beans.SelfScheduleBean;
 import local.hal.st31.android.shift.beans.ShiftRequestBean;
 import local.hal.st31.android.shift.beans.ShiftTypeBean;
@@ -165,34 +166,11 @@ public class DataAccess {
         values.put("date",bean.getDate());
         values.put("shift_type_id",bean.getShiftTypeId());
         values.put("selected_flag",bean.getSelectedFlag());
+        values.put("kaburu_flag",bean.getKaburuFlag());
         db.replace("shiftRequest",null,values);
         values.clear();
     }
 
-    public static ShiftTypeBean getOneShiftTypeBean(SQLiteDatabase db,int shiftTypeId){
-        String sql = "SELECT * FROM shiftType WHERE shift_type_id = ?";
-        Cursor cursor = db.rawQuery(sql,new String[]{String.valueOf(shiftTypeId)});
-        ShiftTypeBean bean = new ShiftTypeBean();
-        if(cursor.moveToFirst()){
-            do{
-                int shiftID = cursor.getInt(cursor.getColumnIndex("shift_id"));
-                int shiftTypeID = cursor.getInt(cursor.getColumnIndex("shift_type_id"));
-                String beginTime = cursor.getString(cursor.getColumnIndex("begin_time"));
-                String endTime = cursor.getString(cursor.getColumnIndex("end_time"));
-                String typeName = cursor.getString(cursor.getColumnIndex("type_name"));
-                String comment = cursor.getString(cursor.getColumnIndex("comment"));
-                bean.setShiftTypeId(shiftTypeId);
-                bean.setShiftId(shiftID);
-                bean.setBeginTime(beginTime);
-                bean.setEndTime(endTime);
-                bean.setTypeName(typeName);
-                bean.setComment(comment);
-            }
-            while(cursor.moveToNext());
-        }
-        cursor.close();
-        return bean;
-    }
 
     public static List<ShiftRequestBean> getShiftRequestByShiftId(SQLiteDatabase db,int shiftId,int selectedFlag){
         List<ShiftRequestBean> list = new ArrayList<>();

@@ -12,10 +12,12 @@ public class ShiftTypeBean {
     private int selectedFlag = 0;//選択されたら1、外したら0、デフォルトは0
     private int shiftRequestId;
     private String date;
+    private int colorCode;
+    private int kaburuFlag;
 
 
     public ShiftTypeBean(){
-
+        colorCode = 0xffffffff;
     }
 
     @NonNull
@@ -94,5 +96,21 @@ public class ShiftTypeBean {
 
     public void setDate(String date) {
         this.date = date;
+    }
+
+    public int getColorCode() {
+        return colorCode;
+    }
+
+    public void setColorCode(int colorCode) {
+        this.colorCode = colorCode;
+    }
+
+    public int getKaburuFlag() {
+        return kaburuFlag;
+    }
+
+    public void setKaburuFlag(int kaburuFlag) {
+        this.kaburuFlag = kaburuFlag;
     }
 }

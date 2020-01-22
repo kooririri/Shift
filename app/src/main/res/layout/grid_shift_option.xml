@@ -2,7 +2,7 @@
 <LinearLayout
     android:id="@+id/shift_block"
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="100dp"
+    android:layout_width="120dp"
     android:layout_height="wrap_content"
     android:padding="5dp"
     android:orientation="vertical"
@@ -45,5 +45,10 @@
 
     </LinearLayout>
 
+    <TextView
+        android:id="@+id/is_kaburu"
+        android:layout_width="60dp"
+        android:layout_height="20dp"
+        android:layout_gravity="center"/>
 
 </LinearLayout >
