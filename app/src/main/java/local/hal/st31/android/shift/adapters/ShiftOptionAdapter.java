@@ -65,9 +65,9 @@ public class ShiftOptionAdapter extends RecyclerView.Adapter<ShiftOptionAdapter.
         shiftOptionViewHolder.optionBlock.setText(res.getTypeName());
         shiftOptionViewHolder.startTime.setText(res.getBeginTime().substring(0,5));
         shiftOptionViewHolder.endTime.setText(res.getEndTime().substring(0,5));
-        Log.e("kaburuka",res.toString());
-        if (res.getKaburuFlag() == 1 && res.getSelectedFlag() == 8){
-            shiftOptionViewHolder.isKaburu.setText("被ってる");
+//        Log.e("kaburuka",res.toString());
+        if (res.getSelfScheduleFlag() == 1){
+            shiftOptionViewHolder.isKaburu.setText("用事ある");
         }
 
         shiftOptionViewHolder.itemView.setOnClickListener(new View.OnClickListener(){
@@ -81,9 +81,10 @@ public class ShiftOptionAdapter extends RecyclerView.Adapter<ShiftOptionAdapter.
         });
 
         if (res.getSelectedFlag() == 0) {
-            shiftOptionViewHolder.itemView.setBackgroundColor(Color.WHITE);
+//            shiftOptionViewHolder.itemView.setBackgroundColor(Color.WHITE);
+            shiftOptionViewHolder.itemView.setBackgroundResource(R.drawable.button_unclicked_style);
         }else if(res.getSelectedFlag() == 1 ||res.getSelectedFlag() == 9){
-            shiftOptionViewHolder.itemView.setBackgroundColor(Color.BLUE);
+            shiftOptionViewHolder.itemView.setBackgroundResource(R.drawable.button_style);
         }
     }
 

@@ -6,7 +6,7 @@
     android:layout_height="wrap_content"
     android:padding="5dp"
     android:orientation="vertical"
-    android:background="@color/cardview_light_background"
+    android:background="@drawable/button_unclicked_style"
     android:layout_marginLeft="10dp">
 
     <TextView

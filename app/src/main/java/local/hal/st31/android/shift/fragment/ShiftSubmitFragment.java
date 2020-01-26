@@ -50,6 +50,7 @@ import local.hal.st31.android.shift.MainActivity;
 import local.hal.st31.android.shift.R;
 import local.hal.st31.android.shift.adapters.ShiftMonthListAdapter;
 import local.hal.st31.android.shift.adapters.ShiftMonthListAdapter2;
+import local.hal.st31.android.shift.beans.SelfScheduleBean;
 import local.hal.st31.android.shift.beans.ShiftRequestBean;
 import local.hal.st31.android.shift.beans.ShiftTypeBean;
 import local.hal.st31.android.shift.db.DataAccess;
@@ -65,19 +66,20 @@ public class ShiftSubmitFragment extends Fragment {
     private ShiftMonthListAdapter shiftMonthListAdapter;
     private ShiftMonthListAdapter2 shiftMonthListAdapter2;
     private TextView dateLabel;
-    private Button shiftRequestSubmitButton;
+    private TextView noDataMessage;
     private List<List<ShiftTypeBean>> dataList;
     private DatabaseHelper _helper;
     private SQLiteDatabase db;
     private Button submitButton;
     int savedId = 0;
     int savedShiftId = 0;
-    int modifyVersion = 3;
-    int year;
-    int month;
+    private List<String> groupNameList;
+    private List<Integer> groupIdList;
+    private String selectedGroup;
+    private int selectedGroupId;
+    private int buttonFlag = 0;
+    List<SelfScheduleBean> selfList;
 
-
-//    private static final String URL = "http://shift_backend.test/shift";
     private static final String URLPost0 = "http://10.0.2.2/shift_app_backend/controllers/shift_controller0.php";
     private static final String URLPost1 = "http://10.0.2.2/shift_app_backend/controllers/shift_controller1.php";
     private static final String URLPost2= "http://10.0.2.2/shift_app_backend/controllers/shift_controller2.php";
@@ -86,7 +88,6 @@ public class ShiftSubmitFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
     }
 
     @Nullable
@@ -94,11 +95,15 @@ public class ShiftSubmitFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         fragmentView = inflater.inflate(R.layout.fragment_shift_submit,container,false);
         shiftListView = fragmentView.findViewById(R.id.shiftListView);
+        noDataMessage = fragmentView.findViewById(R.id.no_data_message);
         _helper = new DatabaseHelper(getContext());
-        Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.MONTH,+1);
-        year = calendar.get(Calendar.YEAR);
-        month = calendar.get(Calendar.MONTH)+1;
+        db = _helper.getWritableDatabase();
+        groupNameList = new ArrayList<>();
+        groupNameList.add("------");
+        groupIdList = new ArrayList<>();
+        groupIdList.add(0);
+        SharedPreferences ps = PreferenceManager.getDefaultSharedPreferences(getContext());
+        savedShiftId = ps.getInt("shiftId",0);
         return fragmentView;
     }
 
@@ -106,9 +111,6 @@ public class ShiftSubmitFragment extends Fragment {
     public void onResume() {
         super.onResume();
         initView();
-
-//        Log.e("kkk",dataList.toString());
-//        Log.e("kkk",getData().toString());
     }
 
     @Override
@@ -127,7 +129,6 @@ public class ShiftSubmitFragment extends Fragment {
                 Map<String,Integer> map = new HashMap<>();
                 map.put("groupId",selectedGroupId);
                 map.put("userId",savedId);
-                Log.e("pxl","kuailaikan"+ "    "+savedId);
                 Gson gson = new GsonBuilder()
                         .serializeNulls()
                         .setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE)
@@ -163,29 +164,58 @@ public class ShiftSubmitFragment extends Fragment {
         submitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                for(int i=0;i<dataList.size();i++){
-                    List<ShiftTypeBean> list = dataList.get(i);
-                    String date = year+"-"+month+"-"+(i+1);
-                    for (int j=0;j<list.size();j++){
-                        ShiftTypeBean bean = list.get(j);
-                        int shiftId = bean.getShiftId();
-                        int shiftTypeId = bean.getShiftTypeId();
-                        String id = shiftId + date + shiftTypeId;
-                        int selectedFlag = bean.getSelectedFlag();
-                        ShiftRequestBean shiftRequestBean = new ShiftRequestBean();
-                        shiftRequestBean.setId(id);
-                        shiftRequestBean.setDate(date);
-                        shiftRequestBean.setShiftId(shiftId);
-                        shiftRequestBean.setShiftTypeId(shiftTypeId);
-                        shiftRequestBean.setSelectedFlag(selectedFlag);
-                        DataAccess.shiftRequestReplace(db,shiftRequestBean);
-                        Log.e("debuga",id+"---------"+date+"--------"+shiftId+"--------"+shiftTypeId+"--------"+selectedFlag);
+                if(buttonFlag == 0){
+                    List<ShiftRequestBean> submitData = new ArrayList<>();
+                    for (int i = 0 ; i < dataList.size() ; i ++ ){
+                        List<ShiftTypeBean> list = dataList.get(i);
+                        for (int j = 0 ; j < list.size() ; j ++ ){
+                            ShiftRequestBean bean = new ShiftRequestBean();
+                            bean.setShiftId(savedShiftId);
+                            bean.setUserId(savedId);
+                            bean.setShiftTypeId(list.get(j).getShiftTypeId());
+                            bean.setSelectedFlag(list.get(j).getSelectedFlag());
+                            bean.setDate(list.get(j).getDate());
+                            bean.setId(list.get(j).getShiftRequestId());
+                            DataAccess.shiftRequestReplace(db,bean);
+                            submitData.add(bean);
+                        }
                     }
+                    Gson gson = new GsonBuilder()
+                            .serializeNulls()
+                            .setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE)
+                            .create();
+                    String submitJson = gson.toJson(submitData);
+                    ShiftRequestPoster shiftRequestPoster = new ShiftRequestPoster();
+                    shiftRequestPoster.execute(URLPost2,submitJson);
+                }else if(buttonFlag == 1){
+                    List<ShiftRequestBean> submitData = new ArrayList<>();
+                    for (int i = 0 ; i < dataList.size() ; i ++ ){
+                        List<ShiftTypeBean> list = dataList.get(i);
+                        for (int j = 0 ; j < list.size() ; j ++ ){
+                            ShiftRequestBean bean = new ShiftRequestBean();
+                            bean.setShiftId(savedShiftId);
+                            bean.setUserId(savedId);
+                            bean.setShiftTypeId(list.get(j).getShiftTypeId());
+                            bean.setSelectedFlag(list.get(j).getSelectedFlag());
+                            bean.setDate(list.get(j).getDate());
+                            bean.setId(list.get(j).getShiftRequestId());
+                            bean.setKaburuFlag(list.get(j).getKaburuFlag());
+                            DataAccess.shiftRequestReplace(db,bean);
+                            submitData.add(bean);
+                        }
+                    }
+                    Gson gson = new GsonBuilder()
+                            .serializeNulls()
+                            .setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE)
+                            .create();
+                    String submitJson = gson.toJson(submitData);
+
+                    ShiftRequestPoster shiftRequestPoster = new ShiftRequestPoster();
+                    shiftRequestPoster.execute(URLPost3,submitJson);
                 }
-                List<ShiftRequestBean> test = DataAccess.getShiftRequestByShiftId(db,1,1);
-                Log.e("debugb",test.toString());
             }
         });
+
     }
 
     private class GroupIdReceiver extends AsyncTask<String,Void,String>{
@@ -263,6 +293,73 @@ public class ShiftSubmitFragment extends Fragment {
         }
     }
 
+    private class ShiftRequestPoster extends AsyncTask<String,Void,String>{
+
+        private static final String DEBUG_TAG = "ShiftRequestPoster";
+        @Override
+        protected String doInBackground(String... params) {
+            String uri = params[0];
+            String jsonData = params[1];
+            HttpURLConnection con = null;
+            InputStream is = null;
+            String result = "";
+
+            try {
+                URL url = new URL(uri);
+                con = (HttpURLConnection) url.openConnection();
+                con.setRequestProperty("Content-Type", "application/json; utf-8"); // 追記
+                con.setRequestProperty("Accept", "application/json");
+                con.setRequestMethod("POST");
+                con.setDoOutput(true);
+                // サーバーへ送るJSONをセットする
+                DataOutputStream wr = new DataOutputStream(con.getOutputStream());
+                wr.writeBytes(jsonData);
+                wr.flush();
+                wr.close();
+
+                con.connect();
+                int status = con.getResponseCode();
+                if(status != 200){
+                    throw new IOException("ステータスコード："+status);
+                }
+                is = con.getInputStream();
+                result = GlobalUtils.getInstance().is2String(is);
+            } catch (MalformedURLException ex) {
+                Log.e(DEBUG_TAG, "URL変換失敗", ex);
+            } catch (IOException ex) {
+                Log.e(DEBUG_TAG, "通信失敗", ex);
+            } finally {
+                if (con != null) {
+                    con.disconnect();
+                }
+                if (is != null) {
+                    try {
+                        is.close();
+                    } catch (IOException ex) {
+                        Log.e(DEBUG_TAG, "InputStream解放失敗", ex);
+                    }
+                }
+            }
+            return result;
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            String status = "";
+
+                try {
+                    JSONObject jsonObject = new JSONObject(result);
+                    status = jsonObject.getString("status");
+                    if(status.equals("ok")){
+                        Toast.makeText(getContext(),"シフト希望は登録しました。",Toast.LENGTH_SHORT).show();
+                    }else{
+                        Toast.makeText(getContext(),"シフト希望の登録失敗しました。",Toast.LENGTH_SHORT).show();
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+            }
+        }
+    }
 
     private class ShiftTypeDataReceiver extends AsyncTask<String,Void,String> {
 
@@ -274,36 +371,47 @@ public class ShiftSubmitFragment extends Fragment {
             HttpURLConnection con = null;
             InputStream is = null;
             String result = "";
+
             try {
-                URL url = new URL(urlStr);
+                URL url = new URL(uri);
                 con = (HttpURLConnection) url.openConnection();
-                con.setRequestMethod("GET");
+                con.setRequestProperty("Content-Type", "application/json; utf-8"); // 追記
+                con.setRequestProperty("Accept", "application/json");
+                con.setRequestMethod("POST");
+                con.setDoOutput(true);
+                // サーバーへ送るJSONをセットする
+                DataOutputStream wr = new DataOutputStream(con.getOutputStream());
+                wr.writeBytes(jsonData);
+                wr.flush();
+                wr.close();
+
                 con.connect();
-                con.setConnectTimeout(2000);
+                int status = con.getResponseCode();
+                if(status != 200){
+                    throw new IOException("ステータスコード："+status);
+                }
                 is = con.getInputStream();
-
                 result = GlobalUtils.getInstance().is2String(is);
-
             } catch (MalformedURLException ex) {
-                Log.e(DEBUG_TAG,"URL変換失敗",ex);
+                Log.e(DEBUG_TAG, "URL変換失敗", ex);
             } catch (IOException ex) {
-                Log.e(DEBUG_TAG,"通信失敗aaa",ex);
-            }
-            finally {
-                if(con != null){
+                Log.e(DEBUG_TAG, "通信失敗", ex);
+            } finally {
+                if (con != null) {
                     con.disconnect();
                 }
-                if(is!=null){
-                    try{
+                if (is != null) {
+                    try {
                         is.close();
-                    }
-                    catch (IOException ex){
-                        Log.e(DEBUG_TAG,"InputStream解放失敗",ex);
+                    } catch (IOException ex) {
+                        Log.e(DEBUG_TAG, "InputStream解放失敗", ex);
                     }
                 }
             }
-            return  result;
+
+            return result;
         }
+
         @Override
         protected void onPostExecute(String result) {
             try {
@@ -348,6 +456,7 @@ public class ShiftSubmitFragment extends Fragment {
                         num++;
 
                     }
+                    Log.e("lklk",num+"");
                     int count = 1;
                     for(int i = 1;i<=days;i++){
                         String date = year + "-" + strMonth + "-" + i;
@@ -366,14 +475,34 @@ public class ShiftSubmitFragment extends Fragment {
                             shiftRequestBean.setKaburuFlag(0);
                             Date a = new Date();
                             shiftRequestBean.setId(count);
-                            Log.e("pxl",shiftRequestBean.toString());
+                            selfList = DataAccess.selfScheduleSelectByDate(db,date);
+                            ShiftTypeBean shiftType = DataAccess.getShiftTypeByTypeId(db,tempTypeId);
+                            int beginHour = Integer.valueOf(shiftType.getBeginTime().substring(0,2));
+//                        int beginMin = Integer.valueOf(shiftType.getBeginTime().substring(3));
+                            int endHour = Integer.valueOf(shiftType.getEndTime().substring(0,2));
+//                        int endMin = Integer.valueOf(shiftType.getEndTime().substring(3));
+                            Log.e("pxlas",shiftType.toString());
+                            for(int n=0;n<selfList.size();n++){
+                                int selfBeginHour = Integer.valueOf(selfList.get(n).getStartTime().substring(0,2));
+                                int selfBeginMin = Integer.valueOf(selfList.get(n).getStartTime().substring(3));
+                                int selfEndHour = Integer.valueOf(selfList.get(n).getEndTime().substring(0,2));
+                                int selfEndMin = Integer.valueOf(selfList.get(n).getEndTime().substring(3));
+                                if(selfBeginHour < beginHour){
+                                    if(selfEndHour > beginHour){
+                                        shiftRequestBean.setSelfScheduleFlag(1);
+                                    }
+                                }
+                                if (selfBeginHour >= beginHour && selfBeginHour <= endHour){
+                                    shiftRequestBean.setSelfScheduleFlag(1);
+                                }
+                            }
                             DataAccess.shiftRequestReplace(db,shiftRequestBean);
                             count ++;
-
                         }
                     }
                     shiftMonthListAdapter = new ShiftMonthListAdapter(getContext());
                     dataList = getData();
+
                     shiftMonthListAdapter.setList(dataList);
                     shiftMonthListAdapter.notifyDataSetChanged();
                     LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
@@ -381,6 +510,8 @@ public class ShiftSubmitFragment extends Fragment {
                     shiftListView.setLayoutManager(layoutManager);
                     shiftListView.setAdapter(shiftMonthListAdapter);
                     buttonFlag = 0;
+                    shiftListView.setVisibility(View.VISIBLE);
+                    fragmentView.findViewById(R.id.no_data_layout).setVisibility(View.INVISIBLE);
                 }else if(resFlg == 1){
                     int shiftId = jsonObject.getInt("shift_id");
                     if(shiftId != savedShiftId){
@@ -403,8 +534,6 @@ public class ShiftSubmitFragment extends Fragment {
                         list.add(bean);
                         DataAccess.shiftTypeReplace(db,bean);
                         num++;
-
-
                     }
                     for (int num3 = 0;num3<shiftRequestDatas.length();num3++){
                         JSONObject requestObject = shiftRequestDatas.getJSONObject(num3);
@@ -416,11 +545,33 @@ public class ShiftSubmitFragment extends Fragment {
                         shiftRequestBean.setShiftTypeId(requestObject.getInt("type_id"));
                         shiftRequestBean.setSelectedFlag(requestObject.getInt("selected_flag"));
                         shiftRequestBean.setKaburuFlag(requestObject.getInt("kaburu_flag"));
+                        selfList = DataAccess.selfScheduleSelectByDate(db,requestObject.getString("date"));
+                        ShiftTypeBean shiftType = DataAccess.getShiftTypeByTypeId(db,requestObject.getInt("type_id"));
+                        int beginHour = Integer.valueOf(shiftType.getBeginTime().substring(0,2));
+//                        int beginMin = Integer.valueOf(shiftType.getBeginTime().substring(3));
+                        int endHour = Integer.valueOf(shiftType.getEndTime().substring(0,2));
+//                        int endMin = Integer.valueOf(shiftType.getEndTime().substring(3));
+                        Log.e("pxlas",shiftType.toString());
+                        for(int i=0;i<selfList.size();i++){
+                            int selfBeginHour = Integer.valueOf(selfList.get(i).getStartTime().substring(0,2));
+                            int selfBeginMin = Integer.valueOf(selfList.get(i).getStartTime().substring(3));
+                            int selfEndHour = Integer.valueOf(selfList.get(i).getEndTime().substring(0,2));
+                            int selfEndMin = Integer.valueOf(selfList.get(i).getEndTime().substring(3));
+                            if(selfBeginHour < beginHour){
+                                if(selfEndHour > beginHour){
+                                    shiftRequestBean.setSelfScheduleFlag(1);
+                                }
+                            }
+                            if (selfBeginHour >= beginHour && selfBeginHour <= endHour){
+                                shiftRequestBean.setSelfScheduleFlag(1);
+                            }
+                        }
+
                         DataAccess.shiftRequestReplace(db,shiftRequestBean);
                     }
                     shiftMonthListAdapter = new ShiftMonthListAdapter(getContext());
                     dataList = getData();
-
+                    LogUtil.e("ooll",dataList.toString());
                     shiftMonthListAdapter.setList(dataList);
                     shiftMonthListAdapter.notifyDataSetChanged();
                     LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
@@ -428,6 +579,8 @@ public class ShiftSubmitFragment extends Fragment {
                     shiftListView.setLayoutManager(layoutManager);
                     shiftListView.setAdapter(shiftMonthListAdapter);
                     buttonFlag = 0;
+                    shiftListView.setVisibility(View.VISIBLE);
+                    fragmentView.findViewById(R.id.no_data_layout).setVisibility(View.INVISIBLE);
                 }else if(resFlg == 2){
                     GlobalUtils.getInstance().kaburuMap = new HashMap<>();
                     int shiftId = jsonObject.getInt("shift_id");
@@ -462,21 +615,29 @@ public class ShiftSubmitFragment extends Fragment {
                         shiftRequestBean.setShiftTypeId(requestObject.getInt("type_id"));
                         shiftRequestBean.setSelectedFlag(requestObject.getInt("selected_flag"));
                         shiftRequestBean.setKaburuFlag(requestObject.getInt("kaburu_flag"));
+                        selfList = DataAccess.selfScheduleSelectByDate(db,requestObject.getString("date"));
+                        ShiftTypeBean shiftType = DataAccess.getShiftTypeByTypeId(db,requestObject.getInt("type_id"));
+                        int beginHour = Integer.valueOf(shiftType.getBeginTime().substring(0,2));
+//                        int beginMin = Integer.valueOf(shiftType.getBeginTime().substring(3));
+                        int endHour = Integer.valueOf(shiftType.getEndTime().substring(0,2));
+//                        int endMin = Integer.valueOf(shiftType.getEndTime().substring(3));
+                        Log.e("pxlas",shiftType.toString());
+                        for(int i=0;i<selfList.size();i++){
+                            int selfBeginHour = Integer.valueOf(selfList.get(i).getStartTime().substring(0,2));
+                            int selfBeginMin = Integer.valueOf(selfList.get(i).getStartTime().substring(3));
+                            int selfEndHour = Integer.valueOf(selfList.get(i).getEndTime().substring(0,2));
+                            int selfEndMin = Integer.valueOf(selfList.get(i).getEndTime().substring(3));
+                            if(selfBeginHour < beginHour){
+                                if(selfEndHour > beginHour){
+                                    shiftRequestBean.setSelfScheduleFlag(1);
+                                }
+                            }
+                            if (selfBeginHour >= beginHour && selfBeginHour <= endHour){
+                                shiftRequestBean.setSelfScheduleFlag(1);
+                            }
+                        }
                         DataAccess.shiftRequestReplace(db,shiftRequestBean);
                     }
-
-//                    JSONArray sameCreation = jsonObject.getJSONArray("same_creation");
-//                    JSONArray blackArray = jsonObject.getJSONArray("black_list");
-//                    List<String> blackList = new ArrayList();
-//                    for(int i = 0;i<blackArray.length();i++){
-//                        JSONObject blackObject = blackArray.getJSONObject(i);
-//                        blackList.add(blackObject.getString("black_user_id"));
-//                    }
-//                    for(int i = 0;i<blackList.size();i++){
-//                        JSONObject tempObject = sameCreation.getJSONObject(i);
-//                        JSONArray res = tempObject.getJSONArray(blackList.get(i));
-//                        GlobalUtils.getInstance().kaburuMap.put(blackList.get(i),res);
-//                    }
                     shiftMonthListAdapter2 = new ShiftMonthListAdapter2(getContext());
                     dataList = getData();
                     LogUtil.e("ooo",dataList.toString());
@@ -487,6 +648,12 @@ public class ShiftSubmitFragment extends Fragment {
                     shiftListView.setLayoutManager(layoutManager);
                     shiftListView.setAdapter(shiftMonthListAdapter2);
                     buttonFlag = 1;
+                    shiftListView.setVisibility(View.VISIBLE);
+                    fragmentView.findViewById(R.id.no_data_layout).setVisibility(View.INVISIBLE);
+                }else if (resFlg == 3){
+                    shiftListView.setVisibility(View.INVISIBLE);
+                    noDataMessage.setText(month+"月のシフトまだ考え中");
+                    fragmentView.findViewById(R.id.no_data_layout).setVisibility(View.VISIBLE);
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -503,8 +670,7 @@ public class ShiftSubmitFragment extends Fragment {
         int num = DataAccess.getShiftTypeNum(db,selectedGroupId);
 
         List<Map<String,Object>> sourceData = DataAccess.getShiftRequestByShiftId(db,shiftId);
-        Log.e("pxl","shiftId = " + "    "+shiftId);
-        Log.e("pxl","sourceData = " + "    "+sourceData);
+        Log.e("malebi",sourceData.toString());
         List<ShiftTypeBean> list = new ArrayList<>();
         if(num >0){
             for (int i = 0 ; i < sourceData.size() ; i ++){
@@ -532,16 +698,16 @@ public class ShiftSubmitFragment extends Fragment {
                 if(sourceData.get(i).containsKey("kaburuFlag")){
                     bean.setKaburuFlag((Integer) sourceData.get(i).get("kaburuFlag"));
                 }
+                if(sourceData.get(i).containsKey("selfScheduleFlag")){
+                    bean.setSelfScheduleFlag((Integer) sourceData.get(i).get("selfScheduleFlag"));
+                }
 
                 list.add(bean);
-                Log.e("pxl",bean.toString());
                 if (i % num == (num-1)){
                     data.add(list);
                 }
             }
         }
-
-        LogUtil.e("ddppp", "------"+data);
         return data;
     }
 

@@ -82,16 +82,17 @@ public class ShiftMonthListAdapter extends RecyclerView.Adapter<ShiftMonthListAd
         int groupId = ps.getInt("groupId",0);
         int type_number = DataAccess.getShiftTypeNum(db,groupId);
         List<ShiftTypeBean> data = list.get(position);
-//        shiftMonthListViewHolder.textView.setText((position+1) + "日");
-        List<Integer> month = new ArrayList<>();
-        for(int i = 0;i < data.size(); i ++){
-            if(i % type_number == 0){
-                month.add(i);
-            }
-        }
-        for(int i = 0;i < month.size(); i ++){
-            shiftMonthListViewHolder.textView.setText((data.get(i).getDate()).substring(8)+"日");
-        }
+        shiftMonthListViewHolder.textView.setText((position+1) + "日");
+
+//        List<Integer> month = new ArrayList<>();
+//        for(int i = 0;i < data.size(); i ++){
+//            if(i % type_number == 0){
+//                month.add(i);
+//            }
+//        }
+//        for(int i = 0;i < month.size(); i ++){
+//            shiftMonthListViewHolder.textView.setText((data.get(i).getDate()).substring(8)+"日");
+//        }
 
 
 //        Map<String, JSONArray> kaburuMap = GlobalUtils.getInstance().kaburuMap;

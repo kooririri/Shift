@@ -13,18 +13,34 @@ public class ShiftTypeBean {
     private int shiftRequestId;
     private String date;
     private int colorCode;
-    private int kaburuFlag;
+    private int kaburuFlag;//blackListの人と被ってるかどうかを判定するフラグ
+    private int selfScheduleFlag;//自分の私用と被ってるかどうかを判定するフラグ
 
 
     public ShiftTypeBean(){
         colorCode = 0xffffffff;
     }
 
-    @NonNull
     @Override
     public String toString() {
-        return this.selectedFlag+"  ";
+        return "ShiftTypeBean{" +
+                "shiftId=" + shiftId +
+                ", shiftTypeId=" + shiftTypeId +
+                ", beginTime='" + beginTime + '\'' +
+                ", endTime='" + endTime + '\'' +
+                ", typeName='" + typeName + '\'' +
+                ", comment='" + comment + '\'' +
+                ", selectedFlag=" + selectedFlag +
+                ", kaburuFlag=" + kaburuFlag +
+                ", shiftRequestId=" + shiftRequestId +
+                ", selfScheduleFlag=" + selfScheduleFlag +
+                ", date='" + date + '\'' +
+                '}';
     }
+
+
+    @NonNull
+
 
     public int getShiftId() {
         return shiftId;
@@ -112,5 +128,13 @@ public class ShiftTypeBean {
 
     public void setKaburuFlag(int kaburuFlag) {
         this.kaburuFlag = kaburuFlag;
+    }
+
+    public int getSelfScheduleFlag() {
+        return selfScheduleFlag;
+    }
+
+    public void setSelfScheduleFlag(int selfScheduleFlag) {
+        this.selfScheduleFlag = selfScheduleFlag;
     }
 }

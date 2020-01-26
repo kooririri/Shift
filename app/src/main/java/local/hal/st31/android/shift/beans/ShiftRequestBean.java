@@ -6,23 +6,44 @@ import java.util.UUID;
 
 public class ShiftRequestBean {
 
-    private String id;//シフト希望ID  id+date+shiftTypeId
+    private int id;//シフト希望ID
+    private int userId;
     private int shiftId;
     private int shiftTypeId;//シフトの番タイプID
     private String date;
     private int selectedFlag;
-    private int kaburuFlag;
+    private int kaburuFlag;//blackListの人と被ってるかどうかを判定するフラグ
+    private int selfScheduleFlag;//自分の私用と被ってるかどうかを判定するフラグ
 
 
     public ShiftRequestBean(){
+        selfScheduleFlag = 0;
+    }
 
+    @Override
+    public String toString() {
+        return "ShiftRequestBean{" +
+                "id='" + id + '\'' +
+                ", userId=" + userId +
+                ", shiftId=" + shiftId +
+                ", shiftTypeId=" + shiftTypeId +
+                ", date='" + date + '\'' +
+                ", selectedFlag=" + selectedFlag +
+                ", kaburuFlag=" + kaburuFlag +
+                ", selfScheduleFlag=" + selfScheduleFlag +
+                '}';
+    }
+
+
+    public int getUserId() {
+        return userId;
+    }
+
+    public void setUserId(int userId) {
+        this.userId = userId;
     }
 
     @NonNull
-    @Override
-    public String toString() {
-        return this.id+"";
-    }
 
 
     public int getId() {
@@ -71,5 +92,13 @@ public class ShiftRequestBean {
 
     public void setKaburuFlag(int kaburuFlag) {
         this.kaburuFlag = kaburuFlag;
+    }
+
+    public int getSelfScheduleFlag() {
+        return selfScheduleFlag;
+    }
+
+    public void setSelfScheduleFlag(int selfScheduleFlag) {
+        this.selfScheduleFlag = selfScheduleFlag;
     }
 }

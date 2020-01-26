@@ -8,6 +8,7 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,6 +30,7 @@ public class ShiftMonthListAdapter2 extends RecyclerView.Adapter<ShiftMonthListA
     private ViewGroup viewGroup;
     private DatabaseHelper _helper;
     private SQLiteDatabase db;
+    int count = 1;
 
     static class ShiftMonthListViewHolder extends RecyclerView.ViewHolder {
         TextView textView;
@@ -108,14 +110,17 @@ public class ShiftMonthListAdapter2 extends RecyclerView.Adapter<ShiftMonthListA
 //        shiftOptionAdapter.notifyDataSetChanged();
 //        shiftHopeList = new ArrayList<>();
         shiftOptionAdapter2.setListener(new ShiftOptionAdapter2.onShiftTypeClickListener() {
+
             @Override
             public void onItemClick(int i, ShiftTypeBean res) {
-                if(res.getKaburuFlag() == 1){
-                    if (res.getSelectedFlag() == 0) {
-                        res.setSelectedFlag(8);
-                    } else {
+                if(res.getKaburuFlag() == 1&&res.getSelectedFlag()==8){
+                    if(count <= 3){
                         res.setSelectedFlag(0);
+                    }else{
+                        Toast.makeText(GlobalUtils.getInstance().context,"3日以上変更できない。",Toast.LENGTH_SHORT).show();
                     }
+                    Log.e("countjj",count+"");
+                    count ++ ;
                 }else{
                     Toast.makeText(GlobalUtils.getInstance().context,"被ってる日しか変更できない。",Toast.LENGTH_SHORT).show();
                 }

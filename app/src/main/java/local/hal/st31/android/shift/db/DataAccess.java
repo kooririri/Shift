@@ -99,7 +99,7 @@ public class DataAccess {
         return dates;
     }
 
-    public static void shiftTypeReplace(SQLiteDatabase db, ShiftTypeBean bean){
+    public static void  shiftTypeReplace(SQLiteDatabase db, ShiftTypeBean bean){
         ContentValues values = new ContentValues();
         values.put("shift_type_id",bean.getShiftTypeId());
         values.put("shift_id",bean.getShiftId());
@@ -107,9 +107,28 @@ public class DataAccess {
         values.put("end_time",bean.getEndTime());
         values.put("type_name",bean.getTypeName());
         values.put("comment",bean.getComment());
-        values.put("selected_flag",bean.getSelectedFlag());
         db.replace("shiftType",null,values);
         values.clear();
+    }
+    public static ShiftTypeBean getShiftTypeByTypeId(SQLiteDatabase db,int typeId){
+        ShiftTypeBean bean = new ShiftTypeBean();
+        String sql = "SELECT * FROM shiftType WHERE shift_type_id = ?";
+        Cursor cursor = db.rawQuery(sql,new String[]{String.valueOf(typeId)});
+        if(cursor.moveToFirst()){
+            int groupId = cursor.getInt(cursor.getColumnIndex("shift_id"));
+            String beginTime = cursor.getString(cursor.getColumnIndex("begin_time"));
+            String endTime = cursor.getString(cursor.getColumnIndex("end_time"));
+            String typeName = cursor.getString(cursor.getColumnIndex("type_name"));
+            String comment = cursor.getString(cursor.getColumnIndex("comment"));
+            bean.setShiftId(groupId);
+            bean.setShiftTypeId(typeId);
+            bean.setBeginTime(beginTime);
+            bean.setEndTime(endTime);
+            bean.setTypeName(typeName);
+            bean.setComment(comment);
+        }
+        cursor.close();
+        return bean;
     }
 
     public static void deleteAllShiftType(SQLiteDatabase db){
@@ -130,71 +149,68 @@ public class DataAccess {
         return num;
     }
 
-    public static List<ShiftTypeBean>  getAllShiftTypeByShiftId(SQLiteDatabase db, int shiftId){
-        List<ShiftTypeBean> list = new ArrayList<>();
-        String sql = "SELECT * FROM shiftType WHERE shift_id = ?";
-        Cursor cursor = db.rawQuery(sql,new String[]{String.valueOf(shiftId)});
-        if(cursor.moveToFirst()){
-            do{
-                int shiftTypeId = cursor.getInt(cursor.getColumnIndex("shift_type_id"));
-                String beginTime = cursor.getString(cursor.getColumnIndex("begin_time"));
-                String endTime = cursor.getString(cursor.getColumnIndex("end_time"));
-                String typeName = cursor.getString(cursor.getColumnIndex("type_name"));
-                String comment = cursor.getString(cursor.getColumnIndex("comment"));
-                int selectedFlag = cursor.getInt(cursor.getColumnIndex("selected_flag"));
-                ShiftTypeBean bean = new ShiftTypeBean();
-                bean.setShiftId(shiftId);
-                bean.setShiftTypeId(shiftTypeId);
-                bean.setBeginTime(beginTime);
-                bean.setEndTime(endTime);
-                bean.setComment(comment);
-                bean.setTypeName(typeName);
-                bean.setSelectedFlag(selectedFlag);
-                list.add(bean);
-            }
-            while(cursor.moveToNext());
-        }
-        cursor.close();
-        return list;
-    }
 
 
     public static void shiftRequestReplace(SQLiteDatabase db, ShiftRequestBean bean){
         ContentValues values = new ContentValues();
         values.put("id",bean.getId());
+        values.put("user_id",bean.getUserId());
+        values.put("shift_type_id",bean.getShiftTypeId());
         values.put("shift_id",bean.getShiftId());
         values.put("date",bean.getDate());
-        values.put("shift_type_id",bean.getShiftTypeId());
         values.put("selected_flag",bean.getSelectedFlag());
         values.put("kaburu_flag",bean.getKaburuFlag());
+        values.put("self_schedule_flag",bean.getSelfScheduleFlag());
         db.replace("shiftRequest",null,values);
         values.clear();
     }
 
 
-    public static List<ShiftRequestBean> getShiftRequestByShiftId(SQLiteDatabase db,int shiftId,int selectedFlag){
-        List<ShiftRequestBean> list = new ArrayList<>();
-        String sql = "SELECT * FROM shiftRequest WHERE shift_id = ? AND selected_flag = ?";
-        Cursor cursor = db.rawQuery(sql,new String[]{String.valueOf(shiftId),String.valueOf(selectedFlag)});
+    public static List<Map<String,Object>> getShiftRequestByShiftId(SQLiteDatabase db, int shiftId){
+        List<Map<String,Object>> list = new ArrayList<>();
+        String sql = "SELECT * FROM shiftRequest r LEFT JOIN shiftType t on r.shift_type_id = t.shift_type_id WHERE r.shift_id = ? ORDER BY r.id";
+        Cursor cursor = db.rawQuery(sql,new String[]{String.valueOf(shiftId)});
         if(cursor.moveToFirst()){
             do{
-                String id = cursor.getString(cursor.getColumnIndex("id"));
+                int id = cursor.getInt(cursor.getColumnIndex("id"));
+                int userId = cursor.getInt(cursor.getColumnIndex("user_id"));
                 int shiftID = cursor.getInt(cursor.getColumnIndex("shift_id"));
                 int shiftTypeId = cursor.getInt(cursor.getColumnIndex("shift_type_id"));
                 String date = cursor.getString(cursor.getColumnIndex("date"));
-                ShiftRequestBean bean = new ShiftRequestBean();
-                bean.setId(id);
-                bean.setShiftTypeId(shiftTypeId);
-                bean.setShiftId(shiftID);
-                bean.setDate(date);
-                bean.setSelectedFlag(selectedFlag);
-                list.add(bean);
+                int selectedFlag = cursor.getInt(cursor.getColumnIndex("selected_flag"));
+                String beginTime = cursor.getString(cursor.getColumnIndex("begin_time"));
+                String endTime = cursor.getString(cursor.getColumnIndex("end_time"));
+                String typeName = cursor.getString(cursor.getColumnIndex("type_name"));
+                String comment = cursor.getString(cursor.getColumnIndex("comment"));
+                int kaburuFlag = cursor.getInt(cursor.getColumnIndex("kaburu_flag"));
+                int selfScheduleFlag = cursor.getInt(cursor.getColumnIndex("self_schedule_flag"));
+                Map<String,Object> map = new HashMap<>();
+                map.put("id",id);
+                map.put("userId",userId);
+                map.put("shiftId",shiftID);
+                map.put("shiftTypeId",shiftTypeId);
+                map.put("date",date);
+                map.put("selectedFlag",selectedFlag);
+                map.put("beginTime",beginTime);
+                map.put("endTime",endTime);
+                map.put("typeName",typeName);
+                map.put("comment",comment);
+                map.put("kaburuFlag",kaburuFlag);
+                map.put("selfScheduleFlag",selfScheduleFlag);
+                list.add(map);
             }
             while(cursor.moveToNext());
         }
         cursor.close();
         return list;
     }
-
-    
+    public static void  blackListReplace(SQLiteDatabase db, BlackListBean bean){
+        ContentValues values = new ContentValues();
+        values.put("black_user_id",bean.getUserId());
+        values.put("group_id",bean.getGroupId());
+        values.put("black_rank",bean.getBlackRank());
+        values.put("color_code",bean.getColorCode());
+        db.replace("shiftType",null,values);
+        values.clear();
+    }
 }
