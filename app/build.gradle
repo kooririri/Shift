@@ -45,5 +45,10 @@ dependencies {
     implementation 'com.github.arcadefire:nice-spinner:1.4.4'
     //colorPicker
     implementation 'com.larswerkman:HoloColorPicker:1.5'
+    //SmartRefreshLayout
+    implementation 'com.scwang.smartrefresh:SmartRefreshLayout:1.1.0'  //1.0.5及以前版本的老用户升级需谨慎，API改动过大
+    implementation 'com.scwang.smartrefresh:SmartRefreshHeader:1.1.0'  //没有使用特殊Header，可以不加这行
+
+    implementation 'com.haibin:calendarview:3.6.6'
 
 }

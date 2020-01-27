@@ -25,6 +25,12 @@ import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
+import com.scwang.smartrefresh.layout.api.RefreshLayout;
+import com.scwang.smartrefresh.layout.constant.SpinnerStyle;
+import com.scwang.smartrefresh.layout.footer.BallPulseFooter;
+import com.scwang.smartrefresh.layout.header.BezierRadarHeader;
+import com.scwang.smartrefresh.layout.header.ClassicsHeader;
+import com.scwang.smartrefresh.layout.listener.OnRefreshListener;
 
 import org.angmarch.views.NiceSpinner;
 import org.angmarch.views.OnSpinnerItemSelectedListener;
@@ -96,6 +102,10 @@ public class ShiftSubmitFragment extends Fragment {
         fragmentView = inflater.inflate(R.layout.fragment_shift_submit,container,false);
         shiftListView = fragmentView.findViewById(R.id.shiftListView);
         noDataMessage = fragmentView.findViewById(R.id.no_data_message);
+        RefreshLayout refreshLayout = fragmentView.findViewById(R.id.refreshLayout);
+        //设置 Header 为 贝塞尔雷达 样式
+        refreshLayout.setRefreshHeader(new BezierRadarHeader(getContext()).setEnableHorizontalDrag(true));
+//        ClassicsHeader header = fragmentView.findViewById(R.id.header);
         _helper = new DatabaseHelper(getContext());
         db = _helper.getWritableDatabase();
         groupNameList = new ArrayList<>();
@@ -104,6 +114,13 @@ public class ShiftSubmitFragment extends Fragment {
         groupIdList.add(0);
         SharedPreferences ps = PreferenceManager.getDefaultSharedPreferences(getContext());
         savedShiftId = ps.getInt("shiftId",0);
+        refreshLayout.setOnRefreshListener(new OnRefreshListener() {
+            @Override
+            public void onRefresh(@NonNull RefreshLayout refreshLayout) {
+                reloadData();
+                refreshLayout.finishRefresh(2000/*,false*/);//传入false表示刷新失败
+            }
+        });
         return fragmentView;
     }
 
@@ -126,25 +143,38 @@ public class ShiftSubmitFragment extends Fragment {
             public void onItemSelected(NiceSpinner parent, View view, int position, long id) {
                 selectedGroup = parent.getItemAtPosition(position).toString();
                 selectedGroupId = groupIdList.get(position);
-                Map<String,Integer> map = new HashMap<>();
-                map.put("groupId",selectedGroupId);
-                map.put("userId",savedId);
-                Gson gson = new GsonBuilder()
-                        .serializeNulls()
-                        .setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE)
-                        .create();
-                String jsonData = gson.toJson(map);
-                ShiftTypeDataReceiver shiftTypeDataReceiver = new ShiftTypeDataReceiver();
-                shiftTypeDataReceiver.execute(URLPost1,jsonData);
-                SharedPreferences ps = PreferenceManager.getDefaultSharedPreferences(getContext());
-                ps.edit().putInt("groupId",selectedGroupId).apply();
+//                Map<String,Integer> map = new HashMap<>();
+//                map.put("groupId",selectedGroupId);
+//                map.put("userId",savedId);
+//                Gson gson = new GsonBuilder()
+//                        .serializeNulls()
+//                        .setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE)
+//                        .create();
+//                String jsonData = gson.toJson(map);
+//                ShiftTypeDataReceiver shiftTypeDataReceiver = new ShiftTypeDataReceiver();
+//                shiftTypeDataReceiver.execute(URLPost1,jsonData);
+//                SharedPreferences ps = PreferenceManager.getDefaultSharedPreferences(getContext());
+//                ps.edit().putInt("groupId",selectedGroupId).apply();
+                reloadData();
             }
         });
     }
 
+    private void reloadData(){
+        Map<String,Integer> map = new HashMap<>();
+        map.put("groupId",selectedGroupId);
+        map.put("userId",savedId);
+        Gson gson = new GsonBuilder()
+                .serializeNulls()
+                .setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE)
+                .create();
+        String jsonData = gson.toJson(map);
+        ShiftTypeDataReceiver shiftTypeDataReceiver = new ShiftTypeDataReceiver();
+        shiftTypeDataReceiver.execute(URLPost1,jsonData);
+        SharedPreferences ps = PreferenceManager.getDefaultSharedPreferences(getContext());
+        ps.edit().putInt("groupId",selectedGroupId).apply();
+    }
     private void initView(){
-
-
         //次の月（シフト）の日数を取得
         SharedPreferences sp = GlobalUtils.getInstance().mainActivity.getSharedPreferences("login", GlobalUtils.getInstance().context.MODE_PRIVATE);
         savedId= sp.getInt("userId",0);

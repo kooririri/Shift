@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -27,6 +28,7 @@ public class ShiftOptionAdapter2 extends RecyclerView.Adapter<ShiftOptionAdapter
         TextView startTime;
         TextView endTime;
         TextView isKaburu;
+        ImageView arrowImage;
         public ShiftOptionViewHolder(@NonNull View itemView) {
             super(itemView);
             shiftBlock = itemView.findViewById(R.id.shift_block);
@@ -34,6 +36,7 @@ public class ShiftOptionAdapter2 extends RecyclerView.Adapter<ShiftOptionAdapter
             startTime = itemView.findViewById(R.id.tx_start_time);
             endTime = itemView.findViewById(R.id.tx_end_time);
             isKaburu = itemView.findViewById(R.id.is_kaburu);
+            arrowImage = itemView.findViewById(R.id.arrow_image);
         }
     }
 
@@ -76,10 +79,17 @@ public class ShiftOptionAdapter2 extends RecyclerView.Adapter<ShiftOptionAdapter
 
         if (res.getSelectedFlag() == 0) {
             shiftOptionViewHolder.itemView.setBackgroundResource(R.drawable.button_unclicked_style);
-//            shiftOptionViewHolder.isKaburu.setVisibility(View.INVISIBLE);
+            shiftOptionViewHolder.arrowImage.setImageResource(R.drawable.baseline_keyboard_arrow_right_24);
+            shiftOptionViewHolder.optionBlock.setTextColor(Color.BLACK);
+            shiftOptionViewHolder.startTime.setTextColor(Color.BLACK);
+            shiftOptionViewHolder.endTime.setTextColor(Color.BLACK);
         }
         if (res.getSelectedFlag() == 8){
-            shiftOptionViewHolder.itemView.setBackgroundResource(R.drawable.button_style);
+            shiftOptionViewHolder.itemView.setBackgroundResource(R.drawable.button_clicked_style);
+            shiftOptionViewHolder.arrowImage.setImageResource(R.drawable.baseline_arrow_forward_ios_white_18);
+            shiftOptionViewHolder.optionBlock.setTextColor(Color.WHITE);
+            shiftOptionViewHolder.startTime.setTextColor(Color.WHITE);
+            shiftOptionViewHolder.endTime.setTextColor(Color.WHITE);
             if (res.getKaburuFlag() == 1){
                 shiftOptionViewHolder.isKaburu.setText("被ってる");
                 shiftOptionViewHolder.isKaburu.setBackgroundColor(Color.RED);

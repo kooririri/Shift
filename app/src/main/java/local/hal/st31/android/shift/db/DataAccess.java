@@ -37,7 +37,7 @@ public class DataAccess {
 
     public static ArrayList<SelfScheduleBean> selfScheduleSelectByDate(SQLiteDatabase db,String date){
         ArrayList<SelfScheduleBean> list = new ArrayList<>();
-        String sql = "SELECT * FROM selfSchedule WHERE date = ?";
+        String sql = "SELECT * FROM selfSchedule WHERE date = ? ORDER BY start_time ASC";
         Cursor cursor = db.rawQuery(sql,new String[]{date});
         if(cursor.moveToFirst()){
             do{
@@ -97,6 +97,20 @@ public class DataAccess {
         }
         cursor.close();
         return dates;
+    }
+
+    public static int getNumberOfSelfScheduleByDate(SQLiteDatabase db,String date){
+        int res = 0;
+        String sql = "SELECT COUNT(*) AS number FROM selfSchedule WHERE date = ?";
+        Cursor cursor = db.rawQuery(sql,new String[]{date});
+        if(cursor.moveToFirst()){
+            do{
+                res = cursor.getInt(cursor.getColumnIndex("number"));
+            }
+            while(cursor.moveToNext());
+        }
+        cursor.close();
+        return res;
     }
 
     public static void  shiftTypeReplace(SQLiteDatabase db, ShiftTypeBean bean){
