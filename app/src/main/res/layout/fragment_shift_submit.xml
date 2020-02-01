@@ -13,7 +13,7 @@
             android:paddingLeft="15dp"
             android:layout_width="match_parent"
             android:layout_height="35dp"
-            android:background="#5e5e5e"
+            android:background="@color/sblue"
             android:text="JUNE 22"
             android:textStyle="bold"
             android:textColor="@android:color/white"
@@ -76,7 +76,7 @@
             android:id="@+id/btn_submit"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="40dp"
+            android:layout_marginBottom="45dp"
 
             android:text="提出"/>
     </LinearLayout>

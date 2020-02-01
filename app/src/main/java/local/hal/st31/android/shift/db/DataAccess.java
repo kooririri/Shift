@@ -25,20 +25,21 @@ public class DataAccess {
      * @return  成功かどうか
      */
     public static long selfScheduleInsert(SQLiteDatabase db,SelfScheduleBean selfScheduleBean){
-        String sql = "INSERT INTO selfSchedule(work,memo,start_time,end_time,date)VALUES(?,?,?,?,?)";
+        String sql = "INSERT INTO selfSchedule(user_id,work,memo,start_time,end_time,date)VALUES(?,?,?,?,?,?)";
         SQLiteStatement stmt =db.compileStatement(sql);
-        stmt.bindString(1,selfScheduleBean.getWork());
-        stmt.bindString(2,selfScheduleBean.getMemo());
-        stmt.bindString(3,selfScheduleBean.getStartTime());
-        stmt.bindString(4,selfScheduleBean.getEndTime());
-        stmt.bindString(5,selfScheduleBean.getDate());
+        stmt.bindLong(1,selfScheduleBean.getUserId());
+        stmt.bindString(2,selfScheduleBean.getWork());
+        stmt.bindString(3,selfScheduleBean.getMemo());
+        stmt.bindString(4,selfScheduleBean.getStartTime());
+        stmt.bindString(5,selfScheduleBean.getEndTime());
+        stmt.bindString(6,selfScheduleBean.getDate());
         return stmt.executeInsert();
     }
 
-    public static ArrayList<SelfScheduleBean> selfScheduleSelectByDate(SQLiteDatabase db,String date){
+    public static ArrayList<SelfScheduleBean> selfScheduleSelectByDate(SQLiteDatabase db,String date,int user_id){
         ArrayList<SelfScheduleBean> list = new ArrayList<>();
-        String sql = "SELECT * FROM selfSchedule WHERE date = ? ORDER BY start_time ASC";
-        Cursor cursor = db.rawQuery(sql,new String[]{date});
+        String sql = "SELECT * FROM selfSchedule WHERE date = ? AND user_id = ? ORDER BY start_time ASC";
+        Cursor cursor = db.rawQuery(sql,new String[]{date,String.valueOf(user_id)});
         if(cursor.moveToFirst()){
             do{
                 long id = cursor.getLong(cursor.getColumnIndex("_id"));
@@ -71,14 +72,15 @@ public class DataAccess {
     }
 
     public static int selfScheduleUpdate(SQLiteDatabase db,SelfScheduleBean selfScheduleBean,long id){
-        String sql = "UPDATE selfSchedule SET work = ?, memo = ?,start_time = ?, end_time = ?, date = ?  WHERE _id = ?";
+        String sql = "UPDATE selfSchedule SET user_id = ?, work = ?, memo = ?,start_time = ?, end_time = ?, date = ?  WHERE _id = ?";
         SQLiteStatement stmt = db.compileStatement(sql);
-        stmt.bindString(1,selfScheduleBean.getWork());
-        stmt.bindString(2,selfScheduleBean.getMemo());
-        stmt.bindString(3,selfScheduleBean.getStartTime());
-        stmt.bindString(4,selfScheduleBean.getEndTime());
-        stmt.bindString(5,selfScheduleBean.getDate());
-        stmt.bindLong(6,id);
+        stmt.bindLong(1,selfScheduleBean.getUserId());
+        stmt.bindString(2,selfScheduleBean.getWork());
+        stmt.bindString(3,selfScheduleBean.getMemo());
+        stmt.bindString(4,selfScheduleBean.getStartTime());
+        stmt.bindString(5,selfScheduleBean.getEndTime());
+        stmt.bindString(6,selfScheduleBean.getDate());
+        stmt.bindLong(7,id);
         return stmt.executeUpdateDelete();
     }
 
@@ -99,10 +101,10 @@ public class DataAccess {
         return dates;
     }
 
-    public static int getNumberOfSelfScheduleByDate(SQLiteDatabase db,String date){
+    public static int getNumberOfSelfScheduleByDate(SQLiteDatabase db,String date,int user_id){
         int res = 0;
-        String sql = "SELECT COUNT(*) AS number FROM selfSchedule WHERE date = ?";
-        Cursor cursor = db.rawQuery(sql,new String[]{date});
+        String sql = "SELECT COUNT(*) AS number FROM selfSchedule WHERE date = ? AND user_id = ?";
+        Cursor cursor = db.rawQuery(sql,new String[]{date,String.valueOf(user_id)});
         if(cursor.moveToFirst()){
             do{
                 res = cursor.getInt(cursor.getColumnIndex("number"));

@@ -23,9 +23,9 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-public class LoginActivity extends AppCompatActivity {
+public class LoginActivity extends BaseActivity {
 
-    private static final String ACCESS_URL = "http://10.0.2.2/shift_app_backend/controllers/login_controller.php";
+    private static final String ACCESS_URL = "http://flexibleshift.sakura.ne.jp/shift_app_backend/controllers/login_controller.php";
     private String mail;
     private String password;
     private String nickName = null;
@@ -37,11 +37,10 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
-
         init();
+        setContentView(R.layout.activity_login);
+
+
     }
 
     private void init() {
@@ -53,8 +52,12 @@ public class LoginActivity extends AppCompatActivity {
         String savedPassword = sp.getString("password",null);
 
         if(savedMail != null && savedPassword !=null){
-            LoginThread loginThread = new LoginThread();
-            loginThread.execute(ACCESS_URL,savedMail,savedPassword);
+//            LoginThread loginThread = new LoginThread();
+//            loginThread.execute(ACCESS_URL,savedMail,savedPassword);
+            Intent intent = new Intent(getApplicationContext(),MainActivity.class);
+            intent.putExtra("nickName",nickName);
+            startActivity(intent);
+            LoginActivity.this.finish();
         }
     }
 
@@ -138,12 +141,14 @@ public class LoginActivity extends AppCompatActivity {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-            SharedPreferences sp = getSharedPreferences("login", getApplicationContext().MODE_PRIVATE);
-            sp.edit().putString("mail",mail).putString("password",pass).putInt("userId",userId).apply();
+
             if(status == 1){
+                SharedPreferences sp = getSharedPreferences("login", getApplicationContext().MODE_PRIVATE);
+                sp.edit().putString("mail",mail).putString("password",pass).putInt("userId",userId).apply();
                 Intent intent = new Intent(getApplicationContext(),MainActivity.class);
                 intent.putExtra("nickName",nickName);
                 startActivity(intent);
+                LoginActivity.this.finish();
             }else{
                 Toast.makeText(getApplicationContext(),"メールアドレスとパスワードをチェックしてからも一回試し下さい",Toast.LENGTH_LONG).show();
             }

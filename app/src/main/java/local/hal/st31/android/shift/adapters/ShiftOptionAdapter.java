@@ -33,7 +33,7 @@ public class ShiftOptionAdapter extends RecyclerView.Adapter<ShiftOptionAdapter.
         TextView optionBlock;
         TextView startTime;
         TextView endTime;
-        TextView isKaburu;
+        ImageView isKaburu;
         ImageView arrowImage;
         public ShiftOptionViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -70,7 +70,7 @@ public class ShiftOptionAdapter extends RecyclerView.Adapter<ShiftOptionAdapter.
         shiftOptionViewHolder.endTime.setText(res.getEndTime().substring(0,5));
 //        Log.e("kaburuka",res.toString());
         if (res.getSelfScheduleFlag() == 1){
-            shiftOptionViewHolder.isKaburu.setText("用事ある");
+            shiftOptionViewHolder.isKaburu.setImageResource(R.drawable.baseline_event_note_24);
         }
 
         shiftOptionViewHolder.itemView.setOnClickListener(new View.OnClickListener(){

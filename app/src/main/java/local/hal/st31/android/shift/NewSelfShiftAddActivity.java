@@ -21,7 +21,7 @@ import local.hal.st31.android.shift.popup.NewShiftPopup;
 import studio.carbonylgroup.textfieldboxes.SimpleTextChangedWatcher;
 import studio.carbonylgroup.textfieldboxes.TextFieldBoxes;
 
-public class NewSelfShiftAddActivity extends AppCompatActivity {
+public class NewSelfShiftAddActivity extends BaseActivity {
     private LinearLayout LLStart;
     private LinearLayout LLEnd;
     private TextView startTime;
@@ -43,6 +43,31 @@ public class NewSelfShiftAddActivity extends AppCompatActivity {
         setContentView(R.layout.activity_new_self_shift_add);
         Intent intent = getIntent();
         date = intent.getStringExtra("date");
+//        String year = date.substring(0,4);
+//        String month = "";
+//        String day = "";
+//        if(date.substring(6,7).equals("-")){
+//            month = "0" + date.substring(5,6);
+//            if (date.length() == 8){
+//                day = "0" + date.substring(7,8);
+//            }else{
+//                day = date.substring(7,9);
+//            }
+//        }else{
+//            month = date.substring(5,7);
+//            if (date.length() == 9){
+//                day = "0" + date.substring(7,8);
+//            }else{
+//                day = date.substring(7,9);
+//            }
+//        }
+//
+//        if(date.substring(6,7).equals("-")){
+//            month = "0" + date.substring(5,6);
+//        }else{
+//            month = date.substring(5,7);
+//        }
+//       date = year + "-" + month + "-" + day;
         initView();
     }
 

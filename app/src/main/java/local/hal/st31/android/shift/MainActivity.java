@@ -15,9 +15,10 @@ import android.widget.TextView;
 import local.hal.st31.android.shift.fragment.HomeFragment;
 import local.hal.st31.android.shift.fragment.PersonalSettingFragment;
 import local.hal.st31.android.shift.fragment.ShiftSubmitFragment;
+import local.hal.st31.android.shift.fragment.WebViewFragment;
 import local.hal.st31.android.shift.utils.GlobalUtils;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends BaseActivity {
     //ALTER TABLE `tbname`
     //  DROP PRIMARY KEY,
     //   ADD PRIMARY KEY(
@@ -26,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView mTextMessage;
     private BottomNavigationView bottomNavigationView;
     private HomeFragment homeFragment;
+    private WebViewFragment webViewFragment;
     private ShiftSubmitFragment shiftSubmitFragment;
     private PersonalSettingFragment personalSettingFragment;
     private Fragment[] fragments;
@@ -49,8 +51,9 @@ public class MainActivity extends AppCompatActivity {
     private void initFragment(){
         homeFragment = new HomeFragment();
         shiftSubmitFragment = new ShiftSubmitFragment();
+        webViewFragment = new WebViewFragment();
         personalSettingFragment = new PersonalSettingFragment();
-        fragments = new Fragment[]{homeFragment,shiftSubmitFragment,homeFragment,personalSettingFragment};
+        fragments = new Fragment[]{homeFragment,shiftSubmitFragment,webViewFragment,personalSettingFragment};
         lastfragment=0;
         getSupportFragmentManager().beginTransaction().replace(R.id.a,homeFragment).show(homeFragment).commit();
         bottomNavigationView=findViewById(R.id.nav_view);

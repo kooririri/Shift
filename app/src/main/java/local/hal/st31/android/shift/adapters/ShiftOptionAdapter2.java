@@ -27,8 +27,9 @@ public class ShiftOptionAdapter2 extends RecyclerView.Adapter<ShiftOptionAdapter
         TextView optionBlock;
         TextView startTime;
         TextView endTime;
-        TextView isKaburu;
+        ImageView isKaburu;
         ImageView arrowImage;
+        ImageView kaburuImage;
         public ShiftOptionViewHolder(@NonNull View itemView) {
             super(itemView);
             shiftBlock = itemView.findViewById(R.id.shift_block);
@@ -37,6 +38,7 @@ public class ShiftOptionAdapter2 extends RecyclerView.Adapter<ShiftOptionAdapter
             endTime = itemView.findViewById(R.id.tx_end_time);
             isKaburu = itemView.findViewById(R.id.is_kaburu);
             arrowImage = itemView.findViewById(R.id.arrow_image);
+            kaburuImage = itemView.findViewById(R.id.kaburuImage);
         }
     }
 
@@ -64,7 +66,8 @@ public class ShiftOptionAdapter2 extends RecyclerView.Adapter<ShiftOptionAdapter
         shiftOptionViewHolder.endTime.setText(res.getEndTime().substring(0,5));
         Log.e("kaburuka",res.toString());
         if (res.getSelfScheduleFlag() == 1){
-            shiftOptionViewHolder.isKaburu.setText("用事ある");
+            shiftOptionViewHolder.isKaburu.setImageResource(R.drawable.baseline_event_note_24);
+//            shiftOptionViewHolder.isKaburu.setBackgroundResource(R.drawable.circle_item);
         }
 
         shiftOptionViewHolder.itemView.setOnClickListener(new View.OnClickListener(){
@@ -91,9 +94,10 @@ public class ShiftOptionAdapter2 extends RecyclerView.Adapter<ShiftOptionAdapter
             shiftOptionViewHolder.startTime.setTextColor(Color.WHITE);
             shiftOptionViewHolder.endTime.setTextColor(Color.WHITE);
             if (res.getKaburuFlag() == 1){
-                shiftOptionViewHolder.isKaburu.setText("被ってる");
-                shiftOptionViewHolder.isKaburu.setBackgroundColor(Color.RED);
-                shiftOptionViewHolder.isKaburu.setTextColor(Color.WHITE);
+                shiftOptionViewHolder.kaburuImage.setImageResource(R.drawable.baseline_people_alt_white_24);
+//                shiftOptionViewHolder.isKaburu.setText("被ってる");
+//                shiftOptionViewHolder.isKaburu.setBackgroundColor(Color.RED);
+//                shiftOptionViewHolder.isKaburu.setTextColor(Color.WHITE);
             }
         }
 

@@ -1,6 +1,7 @@
 package local.hal.st31.android.shift.fragment;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -57,6 +58,7 @@ public class HomeFragment extends Fragment implements CalendarView.OnCalendarSel
     TextView mTextLunar;
     TextView mTextCurrentDay;
     RelativeLayout mRelativeTool;
+    private int userId;
 
 
 
@@ -73,6 +75,8 @@ public class HomeFragment extends Fragment implements CalendarView.OnCalendarSel
         fragmentView = inflater.inflate(R.layout.fragment_home,container,false);
         _helper = new DatabaseHelper(getContext());
         selectedDate = DateUtils.date2String(new Date(),"yyyy-MM-dd");
+        SharedPreferences sp = GlobalUtils.getInstance().mainActivity.getSharedPreferences("login", GlobalUtils.getInstance().context.MODE_PRIVATE);
+        userId= sp.getInt("userId",0);
         return fragmentView;
     }
 
@@ -128,7 +132,7 @@ public class HomeFragment extends Fragment implements CalendarView.OnCalendarSel
         dateLabel.setText(selectedDate);
 
         db = _helper.getWritableDatabase();
-        ArrayList<SelfScheduleBean> data = DataAccess.selfScheduleSelectByDate(db, selectedDate);
+        ArrayList<SelfScheduleBean> data = DataAccess.selfScheduleSelectByDate(db, selectedDate,userId);
         selfScheduleAdapter = new SelfScheduleAdapter(getContext());
         selfScheduleAdapter.setData(data);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
@@ -166,7 +170,7 @@ public class HomeFragment extends Fragment implements CalendarView.OnCalendarSel
         db = _helper.getWritableDatabase();
         selectedDate = calendar.getYear()+"-"+calendar.getMonth()+"-"+calendar.getDay();
         dateLabel.setText(selectedDate);
-        ArrayList<SelfScheduleBean> data = DataAccess.selfScheduleSelectByDate(db, selectedDate);
+        ArrayList<SelfScheduleBean> data = DataAccess.selfScheduleSelectByDate(db, selectedDate,userId);
         selfScheduleAdapter = new SelfScheduleAdapter(getContext());
         selfScheduleAdapter.setData(data);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
@@ -196,7 +200,7 @@ public class HomeFragment extends Fragment implements CalendarView.OnCalendarSel
         Map<String, Calendar> map = new HashMap<>();
         List<String> availableDate = DataAccess.getAvailableDate(db);
         for(int i = 0;i < availableDate.size(); i++){
-            int number = DataAccess.getNumberOfSelfScheduleByDate(db,availableDate.get(i));
+            int number = DataAccess.getNumberOfSelfScheduleByDate(db,availableDate.get(i),userId);
 
             int year = Integer.valueOf(availableDate.get(i).substring(0,4));
             int month = 0;
@@ -217,8 +221,10 @@ public class HomeFragment extends Fragment implements CalendarView.OnCalendarSel
                 }
             }
 //            Log.e("ppssll",availableDate.get(i)+"    "+month+"    "+day);
-            map.put(getSchemeCalendar(year, month, day, 0xFF40db25, number*10+"").toString(),
-                    getSchemeCalendar(year, month, day, 0xFF40db25, number*10+""));
+            if(number > 0){
+                map.put(getSchemeCalendar(year, month, day, 0xFF40db25, number*10+"").toString(),
+                        getSchemeCalendar(year, month, day, 0xFF40db25, number*10+""));
+            }
         }
 
 

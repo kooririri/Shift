@@ -18,6 +18,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         StringBuilder sb = new StringBuilder();
         sb.append("CREATE TABLE selfSchedule (");
         sb.append("_id INTEGER PRIMARY KEY AUTOINCREMENT,");
+        sb.append("user_id INTEGER,");
         sb.append("work TEXT,");
         sb.append("memo TEXT,");
         sb.append("start_time TEXT,");

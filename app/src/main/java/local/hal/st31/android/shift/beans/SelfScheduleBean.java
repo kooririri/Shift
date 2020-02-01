@@ -2,6 +2,7 @@ package local.hal.st31.android.shift.beans;
 
 public class SelfScheduleBean {
     private long _id;
+    private int userId;
     private String work;
     private String memo;
     private String startTime;
@@ -19,6 +20,14 @@ public class SelfScheduleBean {
 
     public void setId(long _id) {
         this._id = _id;
+    }
+
+    public int getUserId() {
+        return userId;
+    }
+
+    public void setUserId(int userId) {
+        this.userId = userId;
     }
 
     public String getWork() {

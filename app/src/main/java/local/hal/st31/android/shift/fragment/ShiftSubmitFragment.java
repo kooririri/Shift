@@ -56,6 +56,7 @@ import local.hal.st31.android.shift.MainActivity;
 import local.hal.st31.android.shift.R;
 import local.hal.st31.android.shift.adapters.ShiftMonthListAdapter;
 import local.hal.st31.android.shift.adapters.ShiftMonthListAdapter2;
+import local.hal.st31.android.shift.adapters.ShiftMonthListAdapter3;
 import local.hal.st31.android.shift.beans.SelfScheduleBean;
 import local.hal.st31.android.shift.beans.ShiftRequestBean;
 import local.hal.st31.android.shift.beans.ShiftTypeBean;
@@ -71,6 +72,7 @@ public class ShiftSubmitFragment extends Fragment {
     private RecyclerView shiftListView;
     private ShiftMonthListAdapter shiftMonthListAdapter;
     private ShiftMonthListAdapter2 shiftMonthListAdapter2;
+    private ShiftMonthListAdapter3 shiftMonthListAdapter3;
     private TextView dateLabel;
     private TextView noDataMessage;
     private List<List<ShiftTypeBean>> dataList;
@@ -86,10 +88,14 @@ public class ShiftSubmitFragment extends Fragment {
     private int buttonFlag = 0;
     List<SelfScheduleBean> selfList;
 
-    private static final String URLPost0 = "http://10.0.2.2/shift_app_backend/controllers/shift_controller0.php";
-    private static final String URLPost1 = "http://10.0.2.2/shift_app_backend/controllers/shift_controller1.php";
-    private static final String URLPost2= "http://10.0.2.2/shift_app_backend/controllers/shift_controller2.php";
-    private static final String URLPost3 = "http://10.0.2.2/shift_app_backend/controllers/shift_controller3.php";
+//    private static final String URLPost0 = "http://10.0.2.2/shift_app_backend/controllers/shift_controller0.php";
+//    private static final String URLPost1 = "http://10.0.2.2/shift_app_backend/controllers/shift_controller1.php";
+//    private static final String URLPost2= "http://10.0.2.2/shift_app_backend/controllers/shift_controller2.php";
+//    private static final String URLPost3 = "http://10.0.2.2/shift_app_backend/controllers/shift_controller3.php";
+    private static final String URLPost0 = "http://flexibleshift.sakura.ne.jp/shift_app_backend/controllers/shift_controller0.php";
+    private static final String URLPost1 = "http://flexibleshift.sakura.ne.jp/shift_app_backend/controllers/shift_controller1.php";
+    private static final String URLPost2= "http://flexibleshift.sakura.ne.jp/shift_app_backend/controllers/shift_controller2.php";
+    private static final String URLPost3 = "http://flexibleshift.sakura.ne.jp/shift_app_backend/controllers/shift_controller3.php";
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -121,6 +127,16 @@ public class ShiftSubmitFragment extends Fragment {
                 refreshLayout.finishRefresh(2000/*,false*/);//传入false表示刷新失败
             }
         });
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(new Date());
+        cal.add(Calendar.MONTH, 1);
+        dateLabel = fragmentView.findViewById(R.id.day_text);
+        dateLabel.setText(cal.get(Calendar.YEAR)+"年"+(cal.get(Calendar.MONTH)+1)+"月");
+        if (buttonFlag == 9){
+            fragmentView.findViewById(R.id.btn_submit).setEnabled(false);
+        }else{
+            fragmentView.findViewById(R.id.btn_submit).setEnabled(true);
+        }
         return fragmentView;
     }
 
@@ -143,18 +159,6 @@ public class ShiftSubmitFragment extends Fragment {
             public void onItemSelected(NiceSpinner parent, View view, int position, long id) {
                 selectedGroup = parent.getItemAtPosition(position).toString();
                 selectedGroupId = groupIdList.get(position);
-//                Map<String,Integer> map = new HashMap<>();
-//                map.put("groupId",selectedGroupId);
-//                map.put("userId",savedId);
-//                Gson gson = new GsonBuilder()
-//                        .serializeNulls()
-//                        .setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE)
-//                        .create();
-//                String jsonData = gson.toJson(map);
-//                ShiftTypeDataReceiver shiftTypeDataReceiver = new ShiftTypeDataReceiver();
-//                shiftTypeDataReceiver.execute(URLPost1,jsonData);
-//                SharedPreferences ps = PreferenceManager.getDefaultSharedPreferences(getContext());
-//                ps.edit().putInt("groupId",selectedGroupId).apply();
                 reloadData();
             }
         });
@@ -454,11 +458,6 @@ public class ShiftSubmitFragment extends Fragment {
                     strMonth = "0" +strMonth;
                 }
                 int days = DateUtils.getDaysByYearMonth(year,month);
-                Calendar cal = Calendar.getInstance();
-                cal.setTime(new Date());
-                cal.add(Calendar.MONTH, 1);
-                dateLabel = fragmentView.findViewById(R.id.day_text);
-                dateLabel.setText(cal.get(Calendar.YEAR)+"年"+(cal.get(Calendar.MONTH)+1)+"月");
                 JSONObject jsonObject = new JSONObject(result);
                 int resFlg = jsonObject.getInt("res_flg");
                 Log.e("pxl","resFlag = "+ "        "+resFlg);
@@ -486,13 +485,9 @@ public class ShiftSubmitFragment extends Fragment {
                         num++;
 
                     }
-                    Log.e("lklk",num+"");
                     int count = 1;
                     for(int i = 1;i<=days;i++){
-                        String date = year + "-" + strMonth + "-" + i;
-                        if(i < 10){
-                            date = year + "-" + strMonth + "-" + "0" + i;
-                        }
+                        String date = year + "-" + month + "-" + i;
                         for(int j=0;j<num;j++){
                             ShiftRequestBean shiftRequestBean = new ShiftRequestBean();
                             int tempShiftId = savedShiftId;
@@ -505,20 +500,20 @@ public class ShiftSubmitFragment extends Fragment {
                             shiftRequestBean.setKaburuFlag(0);
                             Date a = new Date();
                             shiftRequestBean.setId(count);
-                            selfList = DataAccess.selfScheduleSelectByDate(db,date);
+                            selfList = DataAccess.selfScheduleSelectByDate(db,date,savedId);
                             ShiftTypeBean shiftType = DataAccess.getShiftTypeByTypeId(db,tempTypeId);
                             int beginHour = Integer.valueOf(shiftType.getBeginTime().substring(0,2));
 //                        int beginMin = Integer.valueOf(shiftType.getBeginTime().substring(3));
                             int endHour = Integer.valueOf(shiftType.getEndTime().substring(0,2));
 //                        int endMin = Integer.valueOf(shiftType.getEndTime().substring(3));
-                            Log.e("pxlas",shiftType.toString());
                             for(int n=0;n<selfList.size();n++){
                                 int selfBeginHour = Integer.valueOf(selfList.get(n).getStartTime().substring(0,2));
                                 int selfBeginMin = Integer.valueOf(selfList.get(n).getStartTime().substring(3));
                                 int selfEndHour = Integer.valueOf(selfList.get(n).getEndTime().substring(0,2));
                                 int selfEndMin = Integer.valueOf(selfList.get(n).getEndTime().substring(3));
-                                if(selfBeginHour < beginHour){
-                                    if(selfEndHour > beginHour){
+//                                Log.e("asdop","beginHour:"+beginHour+"    "+"endHour:"+endHour + "selfBeginHour:"+selfBeginHour +"  "+"selfEndHour:"+selfEndHour);
+                                if(selfBeginHour <= beginHour){
+                                    if(selfEndHour >= beginHour){
                                         shiftRequestBean.setSelfScheduleFlag(1);
                                     }
                                 }
@@ -551,7 +546,6 @@ public class ShiftSubmitFragment extends Fragment {
                     JSONArray shiftTypeDatas = jsonObject.getJSONArray("shift_type_datas");
                     JSONArray shiftRequestDatas = jsonObject.getJSONArray("shift_request_datas");
                     List<ShiftTypeBean> list = new ArrayList<>();
-                    int num = 0;
                     for(int num2 = 0;num2<shiftTypeDatas.length();num2++){
                         JSONObject dataObject = shiftTypeDatas.getJSONObject(num2);
                         ShiftTypeBean bean = new ShiftTypeBean();
@@ -563,7 +557,6 @@ public class ShiftSubmitFragment extends Fragment {
                         bean.setComment(dataObject.getString("comment"));
                         list.add(bean);
                         DataAccess.shiftTypeReplace(db,bean);
-                        num++;
                     }
                     for (int num3 = 0;num3<shiftRequestDatas.length();num3++){
                         JSONObject requestObject = shiftRequestDatas.getJSONObject(num3);
@@ -575,13 +568,28 @@ public class ShiftSubmitFragment extends Fragment {
                         shiftRequestBean.setShiftTypeId(requestObject.getInt("type_id"));
                         shiftRequestBean.setSelectedFlag(requestObject.getInt("selected_flag"));
                         shiftRequestBean.setKaburuFlag(requestObject.getInt("kaburu_flag"));
-                        selfList = DataAccess.selfScheduleSelectByDate(db,requestObject.getString("date"));
+                        String date = requestObject.getString("date");
+                        String stringYear = date.substring(0,4);
+                        String stringMonth = "";
+                        String stringDay = "";
+                        if(date.substring(5,6).equals("0")){
+                            stringMonth = date.substring(6,7);
+
+                        }else{
+                            stringMonth = date.substring(5,6);
+                        }
+                        if (date.substring(8,9).equals("0")){
+                            stringDay = date.substring(9,10);
+                        }else{
+                            stringDay = date.substring(8,10);
+                        }
+                        String strDate = stringYear + "-" + stringMonth + "-" + stringDay;
+                        selfList = DataAccess.selfScheduleSelectByDate(db,strDate,savedId);
                         ShiftTypeBean shiftType = DataAccess.getShiftTypeByTypeId(db,requestObject.getInt("type_id"));
                         int beginHour = Integer.valueOf(shiftType.getBeginTime().substring(0,2));
 //                        int beginMin = Integer.valueOf(shiftType.getBeginTime().substring(3));
                         int endHour = Integer.valueOf(shiftType.getEndTime().substring(0,2));
 //                        int endMin = Integer.valueOf(shiftType.getEndTime().substring(3));
-                        Log.e("pxlas",shiftType.toString());
                         for(int i=0;i<selfList.size();i++){
                             int selfBeginHour = Integer.valueOf(selfList.get(i).getStartTime().substring(0,2));
                             int selfBeginMin = Integer.valueOf(selfList.get(i).getStartTime().substring(3));
@@ -601,7 +609,6 @@ public class ShiftSubmitFragment extends Fragment {
                     }
                     shiftMonthListAdapter = new ShiftMonthListAdapter(getContext());
                     dataList = getData();
-                    LogUtil.e("ooll",dataList.toString());
                     shiftMonthListAdapter.setList(dataList);
                     shiftMonthListAdapter.notifyDataSetChanged();
                     LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
@@ -612,7 +619,6 @@ public class ShiftSubmitFragment extends Fragment {
                     shiftListView.setVisibility(View.VISIBLE);
                     fragmentView.findViewById(R.id.no_data_layout).setVisibility(View.INVISIBLE);
                 }else if(resFlg == 2){
-                    GlobalUtils.getInstance().kaburuMap = new HashMap<>();
                     int shiftId = jsonObject.getInt("shift_id");
                     if(shiftId != savedShiftId){
                         SharedPreferences ps = PreferenceManager.getDefaultSharedPreferences(getContext());
@@ -621,7 +627,6 @@ public class ShiftSubmitFragment extends Fragment {
                     JSONArray shiftTypeDatas = jsonObject.getJSONArray("shift_type_datas");
                     JSONArray shiftRequestDatas = jsonObject.getJSONArray("shift_request_datas");
                     List<ShiftTypeBean> list = new ArrayList<>();
-                    int num = 0;
                     for(int num2 = 0;num2<shiftTypeDatas.length();num2++){
                         JSONObject dataObject = shiftTypeDatas.getJSONObject(num2);
                         ShiftTypeBean bean = new ShiftTypeBean();
@@ -633,7 +638,6 @@ public class ShiftSubmitFragment extends Fragment {
                         bean.setComment(dataObject.getString("comment"));
                         list.add(bean);
                         DataAccess.shiftTypeReplace(db,bean);
-                        num++;
                     }
                     for (int num3 = 0;num3<shiftRequestDatas.length();num3++){
                         JSONObject requestObject = shiftRequestDatas.getJSONObject(num3);
@@ -645,13 +649,28 @@ public class ShiftSubmitFragment extends Fragment {
                         shiftRequestBean.setShiftTypeId(requestObject.getInt("type_id"));
                         shiftRequestBean.setSelectedFlag(requestObject.getInt("selected_flag"));
                         shiftRequestBean.setKaburuFlag(requestObject.getInt("kaburu_flag"));
-                        selfList = DataAccess.selfScheduleSelectByDate(db,requestObject.getString("date"));
+                        String date = requestObject.getString("date");
+                        String stringYear = date.substring(0,4);
+                        String stringMonth = "";
+                        String stringDay = "";
+                        if(date.substring(5,6).equals("0")){
+                            stringMonth = date.substring(6,7);
+
+                        }else{
+                            stringMonth = date.substring(5,6);
+                        }
+                        if (date.substring(8,9).equals("0")){
+                            stringDay = date.substring(9,10);
+                        }else{
+                            stringDay = date.substring(8,10);
+                        }
+                        String strDate = stringYear + "-" + stringMonth + "-" + stringDay;
+                        selfList = DataAccess.selfScheduleSelectByDate(db,strDate,savedId);
                         ShiftTypeBean shiftType = DataAccess.getShiftTypeByTypeId(db,requestObject.getInt("type_id"));
                         int beginHour = Integer.valueOf(shiftType.getBeginTime().substring(0,2));
 //                        int beginMin = Integer.valueOf(shiftType.getBeginTime().substring(3));
                         int endHour = Integer.valueOf(shiftType.getEndTime().substring(0,2));
 //                        int endMin = Integer.valueOf(shiftType.getEndTime().substring(3));
-                        Log.e("pxlas",shiftType.toString());
                         for(int i=0;i<selfList.size();i++){
                             int selfBeginHour = Integer.valueOf(selfList.get(i).getStartTime().substring(0,2));
                             int selfBeginMin = Integer.valueOf(selfList.get(i).getStartTime().substring(3));
@@ -670,7 +689,6 @@ public class ShiftSubmitFragment extends Fragment {
                     }
                     shiftMonthListAdapter2 = new ShiftMonthListAdapter2(getContext());
                     dataList = getData();
-                    LogUtil.e("ooo",dataList.toString());
                     shiftMonthListAdapter2.setList(dataList);
                     shiftMonthListAdapter2.notifyDataSetChanged();
                     LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
@@ -681,6 +699,87 @@ public class ShiftSubmitFragment extends Fragment {
                     shiftListView.setVisibility(View.VISIBLE);
                     fragmentView.findViewById(R.id.no_data_layout).setVisibility(View.INVISIBLE);
                 }else if (resFlg == 3){
+                    int shiftId = jsonObject.getInt("shift_id");
+                    if(shiftId != savedShiftId){
+                        SharedPreferences ps = PreferenceManager.getDefaultSharedPreferences(getContext());
+                        ps.edit().putInt("shiftId",shiftId).apply();
+                    }
+                    JSONArray shiftTypeDatas = jsonObject.getJSONArray("shift_type_datas");
+                    JSONArray shiftRequestDatas = jsonObject.getJSONArray("shift_request_datas");
+                    List<ShiftTypeBean> list = new ArrayList<>();
+                    for(int num2 = 0;num2<shiftTypeDatas.length();num2++){
+                        JSONObject dataObject = shiftTypeDatas.getJSONObject(num2);
+                        ShiftTypeBean bean = new ShiftTypeBean();
+                        bean.setShiftTypeId(dataObject.getInt("type_id"));
+                        bean.setShiftId(dataObject.getInt("group_id"));
+                        bean.setBeginTime(dataObject.getString("begin_time"));
+                        bean.setEndTime(dataObject.getString("end_time"));
+                        bean.setTypeName(dataObject.getString("type_name"));
+                        bean.setComment(dataObject.getString("comment"));
+                        list.add(bean);
+                        DataAccess.shiftTypeReplace(db,bean);
+                    }
+                    for (int num3 = 0;num3<shiftRequestDatas.length();num3++){
+                        JSONObject requestObject = shiftRequestDatas.getJSONObject(num3);
+                        ShiftRequestBean shiftRequestBean = new ShiftRequestBean();
+                        shiftRequestBean.setId(requestObject.getInt("id"));
+                        shiftRequestBean.setUserId(requestObject.getInt("user_id"));
+                        shiftRequestBean.setDate(requestObject.getString("date"));
+                        shiftRequestBean.setShiftId(requestObject.getInt("shift_id"));
+                        shiftRequestBean.setShiftTypeId(requestObject.getInt("type_id"));
+                        shiftRequestBean.setSelectedFlag(requestObject.getInt("selected_flag"));
+                        shiftRequestBean.setKaburuFlag(requestObject.getInt("kaburu_flag"));
+                        String date = requestObject.getString("date");
+                        String stringYear = date.substring(0,4);
+                        String stringMonth = "";
+                        String stringDay = "";
+                        if(date.substring(5,6).equals("0")){
+                            stringMonth = date.substring(6,7);
+
+                        }else{
+                            stringMonth = date.substring(5,6);
+                        }
+                        if (date.substring(8,9).equals("0")){
+                            stringDay = date.substring(9,10);
+                        }else{
+                            stringDay = date.substring(8,10);
+                        }
+                        String strDate = stringYear + "-" + stringMonth + "-" + stringDay;
+                        selfList = DataAccess.selfScheduleSelectByDate(db,strDate,savedId);
+                        ShiftTypeBean shiftType = DataAccess.getShiftTypeByTypeId(db,requestObject.getInt("type_id"));
+                        int beginHour = Integer.valueOf(shiftType.getBeginTime().substring(0,2));
+//                        int beginMin = Integer.valueOf(shiftType.getBeginTime().substring(3));
+                        int endHour = Integer.valueOf(shiftType.getEndTime().substring(0,2));
+//                        int endMin = Integer.valueOf(shiftType.getEndTime().substring(3));
+                        for(int i=0;i<selfList.size();i++){
+                            int selfBeginHour = Integer.valueOf(selfList.get(i).getStartTime().substring(0,2));
+                            int selfBeginMin = Integer.valueOf(selfList.get(i).getStartTime().substring(3));
+                            int selfEndHour = Integer.valueOf(selfList.get(i).getEndTime().substring(0,2));
+                            int selfEndMin = Integer.valueOf(selfList.get(i).getEndTime().substring(3));
+                            if(selfBeginHour < beginHour){
+                                if(selfEndHour > beginHour){
+                                    shiftRequestBean.setSelfScheduleFlag(1);
+                                }
+                            }
+                            if (selfBeginHour >= beginHour && selfBeginHour <= endHour){
+                                shiftRequestBean.setSelfScheduleFlag(1);
+                            }
+                        }
+                        DataAccess.shiftRequestReplace(db,shiftRequestBean);
+                        shiftMonthListAdapter3 = new ShiftMonthListAdapter3(getContext());
+                        dataList = getData();
+                        shiftMonthListAdapter3.setList(dataList);
+                        shiftMonthListAdapter3.notifyDataSetChanged();
+                        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
+                        layoutManager.setOrientation(LinearLayoutManager.VERTICAL);//縦並び
+                        shiftListView.setLayoutManager(layoutManager);
+                        shiftListView.setAdapter(shiftMonthListAdapter3);
+                        buttonFlag = 0;
+                        shiftListView.setVisibility(View.VISIBLE);
+                        fragmentView.findViewById(R.id.no_data_layout).setVisibility(View.INVISIBLE);
+                        buttonFlag = 9;
+                    }
+                }else if (resFlg == 4){
                     shiftListView.setVisibility(View.INVISIBLE);
                     noDataMessage.setText(month+"月のシフトまだ考え中");
                     fragmentView.findViewById(R.id.no_data_layout).setVisibility(View.VISIBLE);

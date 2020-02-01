@@ -51,10 +51,10 @@ import local.hal.st31.android.shift.db.DataAccess;
 import local.hal.st31.android.shift.db.DatabaseHelper;
 import local.hal.st31.android.shift.utils.GlobalUtils;
 
-public class BlackListActivity extends AppCompatActivity {
+public class BlackListActivity extends BaseActivity {
 
-    private static final String GROUP_URL = "http://10.0.2.2/shift_app_backend/controllers/group_controller.php";
-    private static final String BLACK_URL = "http://10.0.2.2/shift_app_backend/controllers/test.php";
+    private static final String GROUP_URL = "http://flexibleshift.sakura.ne.jp/shift_app_backend/controllers/group_controller.php";
+    private static final String BLACK_URL = "http://flexibleshift.sakura.ne.jp/shift_app_backend/controllers/test.php";
 
     private int userMemberId;
     private List<String> groupNameList;

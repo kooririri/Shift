@@ -74,7 +74,7 @@
         android:id="@+id/text_field_boxes_occupation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:labelText="@string/label_occupation"
+        app:labelText="用事"
         app:panelBackgroundColor="@color/cardview_light_background"
         app:iconSignifier="@drawable/baseline_view_headline_24"
         >
